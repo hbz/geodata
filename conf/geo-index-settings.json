@@ -1,0 +1,67 @@
+{
+	"settings": {
+		"index": {
+			"analysis": {
+				"analyzer": {
+					"autocomplete": {
+						"tokenizer": "my_edge_ngram_tokenizer", 
+						"filter": "lowercase"
+					}, 
+					"lowercasesearch": {
+						"tokenizer": "standard", 
+						"filter": "lowercase"
+					}
+				}, 
+				"tokenizer": {
+					"my_edge_ngram_tokenizer": {
+						"type": "edgeNGram", 
+						"min_gram": "1", 
+						"max_gram": "40", 
+						"token_chars": [
+							"letter", 
+							"digit"
+						]
+					}
+				}
+			}
+		}
+	}, 
+	"mappings": {
+		"location": {
+			"properties": {
+				"street": {
+					"index": "not_analyzed", 
+					"type": "string"
+				}, 
+				"number": {
+					"index": "not_analyzed", 
+					"type": "string"
+				}, 
+				"city": {
+					"index": "not_analyzed", 
+					"type": "string"
+				}, 
+				"country": {
+					"index": "not_analyzed", 
+					"type": "string"
+				}, 
+				"location": {
+					"properties": {
+						"latitude": {
+							"index": "not_analyzed", 
+							"type": "string"
+						},
+						"longitude": {
+							"index": "not_analyzed", 
+							"type": "string"
+						}
+					}
+				}, 
+				"postcode": {
+					"index": "not_analyzed", 
+					"type": "string"
+				}
+			}
+		}
+	}
+}
