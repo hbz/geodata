@@ -30,41 +30,37 @@ public class GeoInformatorTest {
 
 	@Test
 	public void testPostcode() throws JSONException, IOException {
-		String street = "Jülicher Straße";
-		String number = "6";
+		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String postalCode = contentAsString(GeoInformator.getPostCode(street, number, city, country));
+		String postalCode = contentAsString(GeoInformator.getPostCode(street, city, country));
 		assertEquals("50674", postalCode);
 	}
 
 	@Test
 	public void testLatLong() throws JSONException, IOException {
-		String street = "Jülicher Straße";
-		String number = "6";
+		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String latLong = GeoInformator.getLatLong(street, number, city, country).toString();
+		String latLong = GeoInformator.getLatLong(street, city, country).toString();
 		assertEquals("{\"latitude\":\"50.9341361\",\"longitude\":\"6.93551400842729\"}", latLong);
 	}
 
 	@Test
 	public void testLat() throws JSONException, IOException {
-		String street = "Jülicher Straße";
-		String number = "6";
+		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String latitude = contentAsString(GeoInformator.getLat(street, number, city, country));
+		String latitude = contentAsString(GeoInformator.getLat(street, city, country));
 		assertEquals("50.9341361", latitude);
 	}
 
 	@Test
 	public void testLong() throws JSONException, IOException {
-		String street = "Jülicher Straße";
-		String number = "6";
+		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String longitude = contentAsString(GeoInformator.getLong(street, number, city, country));
+		String longitude = contentAsString(GeoInformator.getLong(street, city, country));
 		assertEquals("6.93551400842729", longitude);
 	}
 

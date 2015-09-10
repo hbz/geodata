@@ -24,7 +24,6 @@ public class GeoInformator extends Controller {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final String STREET = "street";
-	private static final String NUMBER = "number";
 	private static final String CITY = "city";
 	private static final String COUNTRY = "country";
 	private static final String GEOCODE = "geocode";
@@ -36,40 +35,54 @@ public class GeoInformator extends Controller {
 	public GeoInformator() {
 	}
 
-	public static Result getPostCode(final String street, final String number, final String city, final String country)
+	public static Result getPostCode(String street, String number, String city, String country)
 			throws JSONException, IOException {
-		return ok(getPostalCode(street, number, city, country).asText());
+		return getPostCode(street + " " + number, city, country);
 	}
 
-	public static Result getLat(final String street, final String number, final String city, final String country)
+	public static Result getLat(String street, String number, String city, String country)
 			throws JSONException, IOException {
-		return ok(getLatLong(street, number, city, country).get("latitude").asText());
+		return getLat(street + " " + number, city, country);
 	}
 
-	public static Result getLong(final String street, final String number, final String city, final String country)
+	public static Result getLong(String street, String number, String city, String country)
 			throws JSONException, IOException {
-		return ok(getLatLong(street, number, city, country).get("longitude").asText());
+		return getLong(street + " " + number, city, country);
 	}
 
-	public static JsonNode getPostalCode(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) throws JSONException, IOException {
-		JsonNode geoNode = getFirstGeoNode(aStreet, aNumber, aCity, aCountry);
+	public static Result getPostCode(String street, String city, String country) throws JSONException, IOException {
+		return ok(getPostalCode(street, city, country).asText());
+	}
+
+	public static Result getLat(final String street, final String city, final String country)
+			throws JSONException, IOException {
+		return ok(getLatLong(street, city, country).get("latitude").asText());
+	}
+
+	public static Result getLong(final String street, final String city, final String country)
+			throws JSONException, IOException {
+		return ok(getLatLong(street, city, country).get("longitude").asText());
+	}
+
+	private static JsonNode getPostalCode(final String aStreet, final String aCity, final String aCountry)
+			throws JSONException, IOException {
+		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
 		return geoNode.get(POSTALCODE);
 	}
 
-	public static JsonNode getLatLong(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) throws JSONException, IOException {
-		JsonNode geoNode = getFirstGeoNode(aStreet, aNumber, aCity, aCountry);
+	public static JsonNode getLatLong(final String aStreet, final String aCity, final String aCountry)
+			throws JSONException, IOException {
+		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
 		return geoNode.get(GEOCODE);
 	}
 
-	private static JsonNode getFirstGeoNode(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) throws JSONException, IOException {
-		SearchResponse response = queryLocal(aStreet, aNumber, aCity, aCountry);
+	private static JsonNode getFirstGeoNode(final String aStreet, final String aCity, final String aCountry)
+			throws JSONException, IOException {
+		SearchResponse response = queryLocal(aStreet, aCity, aCountry);
 		JsonNode geoNode;
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
-			geoNode = createGeoNode(aStreet, aNumber, aCity, aCountry);
+			geoNode = createGeoNode(aStreet, aCity, aCountry);
 			addLocal(geoNode);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
@@ -77,10 +90,9 @@ public class GeoInformator extends Controller {
 		return geoNode;
 	}
 
-	private static SearchResponse queryLocal(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) {
+	private static SearchResponse queryLocal(final String aStreet, final String aCity, final String aCountry) {
 		final BoolQueryBuilder queryBuilder = boolQuery();
-		queryBuilder.must(matchQuery(STREET, aStreet)).must(matchQuery(NUMBER, aNumber)).must(matchQuery(CITY, aCity));
+		queryBuilder.must(matchQuery(STREET, aStreet)).must(matchQuery(CITY, aCity));
 
 		SearchRequestBuilder searchBuilder = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
 				.setTypes(GeoElasticsearch.ES_TYPE);
@@ -107,15 +119,14 @@ public class GeoInformator extends Controller {
 		}
 	}
 
-	private static ObjectNode createGeoNode(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) throws JSONException, IOException {
+	private static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
+			throws JSONException, IOException {
 		ObjectNode geoObject;
 		geoObject = MAPPER.createObjectNode();
 		geoObject.put(STREET, aStreet);
-		geoObject.put(NUMBER, aNumber);
 		geoObject.put(CITY, aCity);
 		geoObject.put(COUNTRY, aCountry);
-		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aNumber, aCity, aCountry);
+		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
 		double latitude = getLat(nominatim);
 		double longitude = getLong(nominatim);
 		String postalcode = (String) getPostcode(nominatim);
