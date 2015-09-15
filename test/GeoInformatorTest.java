@@ -71,7 +71,7 @@ public class GeoInformatorTest {
 		String number = "6";
 		String city = "Köln";
 		String country = "Germany";
-		String longitude = contentAsString(GeoInformator.getLong(street, number, city, country));
+		String longitude = contentAsString(GeoInformator.getLongExplicitNr(street, number, city, country));
 		assertEquals("6.93551400842729", longitude);
 	}
 
@@ -81,7 +81,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getLat(street, number, city, country));
+		assertNull(GeoInformator.getLatExplicitNr(street, number, city, country));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getLong(street, number, city, country));
+		assertNull(GeoInformator.getLongExplicitNr(street, number, city, country));
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getPostCode(street, number, city, country));
+		assertNull(GeoInformator.getPostCodeExplicitNr(street, number, city, country));
 	}
 
 	@AfterClass

@@ -35,17 +35,17 @@ public class GeoInformator extends Controller {
 	public GeoInformator() {
 	}
 
-	public static Result getPostCode(String street, String number, String city, String country)
+	public static Result getPostCodeExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getPostCode(street + " " + number, city, country);
 	}
 
-	public static Result getLat(String street, String number, String city, String country)
+	public static Result getLatExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getLat(street + " " + number, city, country);
 	}
 
-	public static Result getLong(String street, String number, String city, String country)
+	public static Result getLongExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getLong(street + " " + number, city, country);
 	}
