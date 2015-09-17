@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static play.test.Helpers.contentAsString;
 
 import java.io.IOException;
@@ -62,6 +63,43 @@ public class GeoInformatorTest {
 		String country = "Germany";
 		String longitude = contentAsString(GeoInformator.getLong(street, city, country));
 		assertEquals("6.93551400842729", longitude);
+	}
+
+	@Test
+	public void test4Parameters() throws JSONException, IOException {
+		String street = "Jülicher Straße";
+		String number = "6";
+		String city = "Köln";
+		String country = "Germany";
+		String longitude = contentAsString(GeoInformator.getLongExplicitNr(street, number, city, country));
+		assertEquals("6.93551400842729", longitude);
+	}
+
+	@Test
+	public void testNonExistingAddressLat() throws JSONException, IOException {
+		String street = "All people are equal";
+		String number = "123456789";
+		String city = "Justice";
+		String country = "Land of Peace And Hope";
+		assertNull(GeoInformator.getLatExplicitNr(street, number, city, country));
+	}
+
+	@Test
+	public void testNonExistingAddressLong() throws JSONException, IOException {
+		String street = "All people are equal";
+		String number = "123456789";
+		String city = "Justice";
+		String country = "Land of Peace And Hope";
+		assertNull(GeoInformator.getLongExplicitNr(street, number, city, country));
+	}
+
+	@Test
+	public void testNonExistingAddressPostcode() throws JSONException, IOException {
+		String street = "All people are equal";
+		String number = "123456789";
+		String city = "Justice";
+		String country = "Land of Peace And Hope";
+		assertNull(GeoInformator.getPostCodeExplicitNr(street, number, city, country));
 	}
 
 	@AfterClass

@@ -35,44 +35,62 @@ public class GeoInformator extends Controller {
 	public GeoInformator() {
 	}
 
-	public static Result getPostCode(String street, String number, String city, String country)
+	public static Result getPostCodeExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getPostCode(street + " " + number, city, country);
 	}
 
-	public static Result getLat(String street, String number, String city, String country)
+	public static Result getLatExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getLat(street + " " + number, city, country);
 	}
 
-	public static Result getLong(String street, String number, String city, String country)
+	public static Result getLongExplicitNr(String street, String number, String city, String country)
 			throws JSONException, IOException {
 		return getLong(street + " " + number, city, country);
 	}
 
 	public static Result getPostCode(String street, String city, String country) throws JSONException, IOException {
-		return ok(getPostalCode(street, city, country).asText());
+		JsonNode postCode = getPostalCode(street, city, country);
+		if (postCode == null) {
+			return null;
+		}
+		return ok(postCode.asText());
 	}
 
 	public static Result getLat(final String street, final String city, final String country)
 			throws JSONException, IOException {
-		return ok(getLatLong(street, city, country).get("latitude").asText());
+		JsonNode latLong = getLatLong(street, city, country);
+		if (latLong == null) {
+			return null;
+		}
+		return ok(latLong.get("latitude").asText());
 	}
 
 	public static Result getLong(final String street, final String city, final String country)
 			throws JSONException, IOException {
-		return ok(getLatLong(street, city, country).get("longitude").asText());
+		JsonNode latLong = getLatLong(street, city, country);
+		if (latLong == null) {
+			return null;
+		}
+		return ok(latLong.get("longitude").asText());
 	}
 
 	private static JsonNode getPostalCode(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
+		if (geoNode == null) {
+			return null;
+		}
 		return geoNode.get(POSTALCODE);
 	}
 
 	public static JsonNode getLatLong(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
+		if (geoNode == null) {
+			return null;
+		}
 		return geoNode.get(GEOCODE);
 	}
 
@@ -83,7 +101,9 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = createGeoNode(aStreet, aCity, aCountry);
-			addLocal(geoNode);
+			if (geoNode != null) {
+				addLocal(geoNode);
+			}
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
@@ -121,18 +141,26 @@ public class GeoInformator extends Controller {
 
 	private static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
+		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
+		if (nominatim == null) {
+			return null;
+		}
+		double latitude = getLat(nominatim);
+		double longitude = getLong(nominatim);
+		String postalcode = (String) getPostcode(nominatim);
+		ObjectNode geoObject = buildGeoObject(aStreet, aCity, aCountry);
+		geoObject.put(GEOCODE, new ObjectMapper().readTree( //
+				String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+		geoObject.put(POSTALCODE, postalcode);
+		return geoObject;
+	}
+
+	private static ObjectNode buildGeoObject(final String aStreet, final String aCity, final String aCountry) {
 		ObjectNode geoObject;
 		geoObject = MAPPER.createObjectNode();
 		geoObject.put(STREET, aStreet);
 		geoObject.put(CITY, aCity);
 		geoObject.put(COUNTRY, aCountry);
-		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
-		double latitude = getLat(nominatim);
-		double longitude = getLong(nominatim);
-		String postalcode = (String) getPostcode(nominatim);
-		geoObject.put(GEOCODE, new ObjectMapper().readTree( //
-				String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
-		geoObject.put(POSTALCODE, postalcode);
 		return geoObject;
 	}
 

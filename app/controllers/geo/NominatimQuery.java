@@ -19,16 +19,16 @@ public class NominatimQuery {
 				.format("http://nominatim.openstreetmap.org/search.php?q=%s%s%s%s%s&addressdetails=1&format=json", //
 						aStreetPlusNumber, "%2C+", aCity, "%2C+", aCountry)
 				.replaceAll(" ", "%20");
-		return readJsonArrayFromUrl(queryString).getJSONObject(0);
+		JSONArray results = readJsonArrayFromUrl(queryString);
+		if (results.length() == 0) {
+			return null;
+		}
+		return results.getJSONObject(0);
 	}
 
 	public static JSONObject getFirstHit(final String aStreet, final String aNumber, final String aCity,
 			final String aCountry) throws JSONException, IOException {
-		String queryString = String
-				.format("http://nominatim.openstreetmap.org/search.php?q=%s+%s%s%s%s%s&addressdetails=1&format=json", //
-						aStreet, aNumber, "%2C+", aCity, "%2C+", aCountry)
-				.replaceAll(" ", "%20");
-		return readJsonArrayFromUrl(queryString).getJSONObject(0);
+		return getFirstHit(aStreet + "+" + aNumber, aCity, aCountry);
 	}
 
 	private static JSONArray readJsonArrayFromUrl(String aUrl) throws IOException, JSONException {
