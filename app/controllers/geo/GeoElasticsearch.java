@@ -18,6 +18,9 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 @SuppressWarnings("javadoc")
 public class GeoElasticsearch {
 
+	// COMMON SETTING
+	protected static final String HTTP_AGENT = "java.net.URLConnection, email=<semweb@hbz-nrw.de>";
+
 	// ELASTICSEARCH SETTINGS
 	protected static final String ES_CLUSTER = "organisation-cluster";
 	protected static final String ES_INDEX = "organisation-geos";
