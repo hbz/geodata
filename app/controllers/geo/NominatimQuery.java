@@ -14,10 +14,6 @@ import org.json.JSONObject;
 
 public class NominatimQuery {
 
-	static {
-		System.setProperty("http.agent", "java.net.URLConnection, email=<semweb@hbz-nrw.de>");
-	}
-
 	public static JSONObject getFirstHit(final String aStreetPlusNumber, final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		String queryString = String
