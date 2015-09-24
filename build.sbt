@@ -1,6 +1,6 @@
 import play.Project._
 
-name := """lobid-geo-enrichment"""
+name := """geodata"""
 
 version := "1.0-SNAPSHOT"
 
