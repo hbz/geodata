@@ -36,16 +36,20 @@ public class NominatimQuery {
 		URLConnection connection = new URL(aUrl).openConnection();
 		connection.setRequestProperty("http.agent", GeoElasticsearch.HTTP_AGENT);
 		InputStream is = connection.getInputStream();
+		StringBuilder sb = new StringBuilder();
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-			StringBuilder sb = new StringBuilder();
+
 			int value;
 			while ((value = reader.read()) != -1) {
 				sb.append((char) value);
 			}
-			return new JSONArray(sb.toString());
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		} finally {
 			is.close();
 		}
+		return new JSONArray(sb.toString());
 	}
 }
