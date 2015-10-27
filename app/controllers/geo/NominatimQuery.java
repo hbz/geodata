@@ -8,19 +8,31 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NominatimQuery {
 
+	final private static String mScheme = "http";
+	final private static String mAuthority = "nominatim.openstreetmap.org";
+	final private static String mPath = "/search.php";
+	final private static String[] mBadSpecialChars = { "Ã", "Ã", "Ã", "Ã¤", "Ã¶", "Ã¼", "Ã" };
+	final private static String[] mGoodSpecialChars = { "Ä", "Ö", "Ü", "ä", "ö", "ü", "ß" };
+
+	static {
+		assert(mBadSpecialChars.length == mGoodSpecialChars.length);
+	}
+
 	public static JSONObject getFirstHit(final String aStreetPlusNumber, final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		String queryString = String
-				.format("http://nominatim.openstreetmap.org/search.php?q=%s%s%s%s%s&addressdetails=1&format=json", //
-						aStreetPlusNumber, "%2C+", aCity, "%2C+", aCountry)
+				.format("q=%s%s%s%s%s&addressdetails=1&format=json", aStreetPlusNumber, "%2C+", aCity, "%2C+", aCountry) //
 				.replaceAll(" ", "%20");
-		JSONArray results = readJsonArrayFromUrl(queryString);
+		queryString = repairSpecialChars(queryString);
+		String url = mScheme + "://" + mAuthority + mPath + "?" + queryString;
+		JSONArray results = readJsonArrayFromUrl(url);
 		if (results.length() == 0) {
 			return null;
 		}
@@ -51,5 +63,9 @@ public class NominatimQuery {
 			is.close();
 		}
 		return new JSONArray(sb.toString());
+	}
+
+	private static String repairSpecialChars(String aQuery) {
+		return StringUtils.replaceEach(aQuery, mBadSpecialChars, mGoodSpecialChars);
 	}
 }
