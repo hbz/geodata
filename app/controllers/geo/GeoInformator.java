@@ -28,6 +28,7 @@ public class GeoInformator extends Controller {
 	private static final String COUNTRY = "country";
 	private static final String GEOCODE = "geocode";
 	private static final String POSTALCODE = "postalcode";
+	private static final String NOT_FOUND = "Not found (404): ";
 
 	// private static final Client mClient = GeoElasticsearch.ES_CLIENT;
 
@@ -53,7 +54,7 @@ public class GeoInformator extends Controller {
 	public static Result getPostCode(String street, String city, String country) throws JSONException, IOException {
 		JsonNode postCode = getPostalCode(street, city, country);
 		if (postCode == null) {
-			return notFound(street.concat("+").concat(city).concat("+").concat(country));
+			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(postCode.asText());
 	}
@@ -62,7 +63,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(street.concat("+").concat(city).concat("+").concat(country));
+			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("latitude").asText());
 	}
@@ -71,7 +72,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(street.concat("+").concat(city).concat("+").concat(country));
+			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("longitude").asText());
 	}

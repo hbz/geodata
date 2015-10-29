@@ -1,5 +1,5 @@
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.contentAsString;
 
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getLatExplicitNr(street, number, city, country));
+		assertTrue(contentAsString(GeoInformator.getLatExplicitNr(street, number, city, country)).contains("404"));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getLongExplicitNr(street, number, city, country));
+		assertTrue(contentAsString(GeoInformator.getLongExplicitNr(street, number, city, country)).contains("404"));
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertNull(GeoInformator.getPostCodeExplicitNr(street, number, city, country));
+		assertTrue(contentAsString(GeoInformator.getPostCodeExplicitNr(street, number, city, country)).contains("404"));
 	}
 
 	@AfterClass
