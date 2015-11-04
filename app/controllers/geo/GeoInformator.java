@@ -102,9 +102,7 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = createGeoNode(aStreet, aCity, aCountry);
-			if (geoNode != null) {
-				addLocal(geoNode);
-			}
+			addLocal(geoNode);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
@@ -142,21 +140,22 @@ public class GeoInformator extends Controller {
 
 	private static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
+		// grid data of this geo node:
+		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
+		// data enrichment to this geo node:
 		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
-		if (nominatim == null) {
-			return null;
+		if (nominatim != null) {
+			double latitude = getLat(nominatim);
+			double longitude = getLong(nominatim);
+			String postalcode = (String) getPostcode(nominatim);
+			geoNode.put(GEOCODE, new ObjectMapper().readTree( //
+					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+			geoNode.put(POSTALCODE, postalcode);
 		}
-		double latitude = getLat(nominatim);
-		double longitude = getLong(nominatim);
-		String postalcode = (String) getPostcode(nominatim);
-		ObjectNode geoObject = buildGeoObject(aStreet, aCity, aCountry);
-		geoObject.put(GEOCODE, new ObjectMapper().readTree( //
-				String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
-		geoObject.put(POSTALCODE, postalcode);
-		return geoObject;
+		return geoNode;
 	}
 
-	private static ObjectNode buildGeoObject(final String aStreet, final String aCity, final String aCountry) {
+	private static ObjectNode buildGeoNode(final String aStreet, final String aCity, final String aCountry) {
 		ObjectNode geoObject;
 		geoObject = MAPPER.createObjectNode();
 		geoObject.put(STREET, aStreet);
