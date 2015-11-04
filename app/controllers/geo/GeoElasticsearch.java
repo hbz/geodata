@@ -22,8 +22,8 @@ public class GeoElasticsearch {
 	protected static final String HTTP_AGENT = "java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
 	// ELASTICSEARCH SETTINGS
-	protected static final String ES_CLUSTER = "organisation-cluster";
-	protected static final String ES_INDEX = "organisation-geos";
+	protected static final String ES_CLUSTER = "elasticsearch";
+	protected static final String ES_INDEX = "testindex";
 	protected static final String ES_TYPE = "location";
 	protected static final String SERVER_NAME = "localhost";
 	protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
@@ -59,5 +59,9 @@ public class GeoElasticsearch {
 			final DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(ES_INDEX);
 			aClient.admin().indices().delete(deleteIndexRequest);
 		}
+	}
+
+	public static Client getClient() {
+		return ES_CLIENT;
 	}
 }
