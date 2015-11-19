@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -45,8 +44,7 @@ public class GeoElasticsearch {
 		ES_CLIENT = aClient;
 	}
 
-	public static void createEmptyIndex(final Client aClient) throws IOException {
-		deleteIndex(aClient);
+	public static void createIndex(final Client aClient) throws IOException {
 		String settingsMappings = Files.lines(Paths.get(SETTINGS_FILE)).collect(Collectors.joining());
 		CreateIndexRequestBuilder cirb = aClient.admin().indices().prepareCreate(ES_INDEX);
 		cirb.setSource(settingsMappings);
@@ -54,11 +52,8 @@ public class GeoElasticsearch {
 		aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
-	private static void deleteIndex(final Client aClient) {
-		if (aClient.admin().indices().prepareExists(ES_INDEX).execute().actionGet().isExists()) {
-			final DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(ES_INDEX);
-			aClient.admin().indices().delete(deleteIndexRequest);
-		}
+	public static boolean hasIndex(final Client aClient) {
+		return aClient.admin().indices().prepareExists(ES_INDEX).execute().actionGet().isExists();
 	}
 
 	public static Client getClient() {

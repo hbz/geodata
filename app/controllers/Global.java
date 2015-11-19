@@ -13,7 +13,9 @@ public class Global extends GlobalSettings {
 	public void onStart(Application app) {
 		Logger.info("geodata start...");
 		try {
-			GeoElasticsearch.createEmptyIndex(GeoElasticsearch.getClient());
+			if (!GeoElasticsearch.hasIndex(GeoElasticsearch.getClient())) {
+				GeoElasticsearch.createIndex(GeoElasticsearch.getClient());
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
