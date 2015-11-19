@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -55,12 +54,6 @@ public class GeoElasticsearch {
 
 	public static boolean hasIndex(final Client aClient) {
 		return aClient.admin().indices().prepareExists(ES_INDEX).execute().actionGet().isExists();
-	}
-
-	// currently not in use
-	public static void deleteIndex(final Client aClient) {
-		final DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(ES_INDEX);
-		aClient.admin().indices().delete(deleteIndexRequest);
 	}
 
 	public static Client getClient() {
