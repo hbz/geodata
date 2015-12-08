@@ -49,6 +49,9 @@ public class GeoElasticsearch {
 		CreateIndexRequestBuilder cirb = aClient.admin().indices().prepareCreate(ES_INDEX);
 		cirb.setSource(settingsMappings);
 		cirb.execute().actionGet();
+	}
+
+	public static void refreshIndex(final Client aClient) {
 		aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 

@@ -19,6 +19,7 @@ public class Global extends GlobalSettings {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		GeoElasticsearch.refreshIndex(GeoElasticsearch.getClient());
 	}
 
 	@Override
