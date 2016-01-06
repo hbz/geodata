@@ -31,4 +31,15 @@ public class NominatimQuery {
 		return getFirstHit(aStreet + "+" + aNumber, aCity, aCountry);
 	}
 
+	public static double getLat(JSONObject aGeoJson) {
+		return aGeoJson.getDouble("lat");
+	}
+
+	public static double getLong(JSONObject aGeoJson) {
+		return aGeoJson.getDouble("lon");
+	}
+
+	public static Object getPostcode(JSONObject aGeoJson) {
+		return aGeoJson.getJSONObject("address").get("postcode");
+	}
 }

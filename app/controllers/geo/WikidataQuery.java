@@ -42,4 +42,15 @@ public class WikidataQuery {
 		return result;
 	}
 
+	public static double getLat(JSONObject aGeoJson) {
+		return aGeoJson.getJSONObject("entities").getJSONObject("Q365").getJSONObject("claims").getJSONArray("P625")
+				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
+				.getDouble("latitude");
+	}
+
+	public static double getLong(JSONObject aGeoJson) {
+		return aGeoJson.getJSONObject("entities").getJSONObject("Q365").getJSONObject("claims").getJSONArray("P625")
+				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
+				.getDouble("longitude");
+	}
 }

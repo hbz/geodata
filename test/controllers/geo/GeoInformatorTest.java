@@ -7,29 +7,10 @@ import static play.test.Helpers.contentAsString;
 import java.io.IOException;
 
 import org.json.JSONException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import controllers.geo.GeoInformator;
 
 @SuppressWarnings("javadoc")
 public class GeoInformatorTest {
-
-	// private static Node node;
-	// private static Client client;
-	// private static GeoInformator geoInformator;
-
-	@BeforeClass
-	public static void makeIndex() throws IOException, InterruptedException {
-		// node = nodeBuilder().local(true).node();
-		// client = node.client();
-		// GeoElasticsearch geoES = new GeoElasticsearch(client);
-		// geoES.createEmptyIndex(client);
-		// GeoElasticsearch.createEmptyIndex(client);
-		// geoInformator = new GeoInformator();
-		// Thread.sleep(1000);
-	}
 
 	@Test
 	public void testPostcode() throws JSONException, IOException {
@@ -104,10 +85,12 @@ public class GeoInformatorTest {
 		assertTrue(contentAsString(GeoInformator.getPostCodeExplicitNr(street, number, city, country)).contains("404"));
 	}
 
-	@AfterClass
-	public static void closeElasticSearch() {
-		// client.close();
-		// node.close();
+	@Test
+	public void testWikidata() throws JSONException, IOException {
+		String query = "Köln";
+		String latAndlong = contentAsString(GeoInformator.getLatAndLong(query));
+		assertTrue(latAndlong.contains("50.942"));
+		assertTrue(latAndlong.contains("6.95777"));
 	}
 
 }
