@@ -6,8 +6,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class NominatimQuery {
 
+	final private static ObjectMapper MAPPER = new ObjectMapper();
 	final private static String mScheme = "http";
 	final private static String mAuthority = "nominatim.openstreetmap.org";
 	final private static String mPath = "/search.php";
@@ -41,5 +45,31 @@ public class NominatimQuery {
 
 	public static Object getPostcode(JSONObject aGeoJson) {
 		return aGeoJson.getJSONObject("address").get("postcode");
+	}
+
+	public static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
+			throws JSONException, IOException {
+		// grid data of this geo node:
+		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
+		// data enrichment to this geo node:
+		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
+		if (nominatim != null) {
+			double latitude = NominatimQuery.getLat(nominatim);
+			double longitude = NominatimQuery.getLong(nominatim);
+			String postalcode = (String) NominatimQuery.getPostcode(nominatim);
+			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
+					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+			geoNode.put(Constants.POSTALCODE, postalcode);
+		}
+		return geoNode;
+	}
+
+	private static ObjectNode buildGeoNode(final String aStreet, final String aCity, final String aCountry) {
+		ObjectNode geoObject;
+		geoObject = MAPPER.createObjectNode();
+		geoObject.put(Constants.STREET, aStreet);
+		geoObject.put(Constants.CITY, aCity);
+		geoObject.put(Constants.COUNTRY, aCountry);
+		return geoObject;
 	}
 }

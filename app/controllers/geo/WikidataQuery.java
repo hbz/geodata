@@ -6,8 +6,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class WikidataQuery {
 
+	final private static ObjectMapper MAPPER = new ObjectMapper();
 	final private static String SCHEME = "https";
 	final private static String AUTHORITY = "www.wikidata.org";
 	final private static String PATH_STEP_1 = "/w/api.php?action=query&list=search&format=json&srsearch=";
@@ -53,4 +57,26 @@ public class WikidataQuery {
 				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
 				.getDouble("longitude");
 	}
+
+	public static ObjectNode createGeoNode(final String aQuery) throws JSONException, IOException {
+		// grid data of this geo node:
+		ObjectNode geoNode = buildGeoNode(aQuery);
+		// data enrichment to this geo node:
+		JSONObject wikidata = WikidataQuery.getFirstHit(aQuery);
+		if (wikidata != null) {
+			double latitude = WikidataQuery.getLat(wikidata);
+			double longitude = WikidataQuery.getLong(wikidata);
+			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
+					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+		}
+		return geoNode;
+	}
+
+	private static ObjectNode buildGeoNode(final String aQuery) {
+		ObjectNode geoObject;
+		geoObject = MAPPER.createObjectNode();
+		geoObject.put(Constants.TERM, aQuery);
+		return geoObject;
+	}
+
 }
