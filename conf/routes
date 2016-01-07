@@ -1,19 +1,19 @@
 GET     /                                 controllers.Application.index()
 
-# Latitude
+# Latitude + Longitude from Wikidata
+GET     /geodata                          controllers.geo.GeoInformator.getLatAndLong(q)
+
+# Latitude from Nominatim
 GET     /lat/:str/:nr/:cty/:cntry         controllers.geo.GeoInformator.getLatExplicitNr(str: String, nr: String, cty: String, cntry: String)
 GET     /lat/:str/:cty/:cntry             controllers.geo.GeoInformator.getLat(str: String, cty: String, cntry: String)
-# GET     /lat                              controllers.geo.GeoInformator.getLat(street?="", number?="", city?="", country?="")
 
-# Longitude
+# Longitude from Nominatim
 GET     /long/:str/:nr/:cty/:cntry        controllers.geo.GeoInformator.getLongExplicitNr(str: String, nr: String, cty: String, cntry: String)
 GET     /long/:str/:cty/:cntry            controllers.geo.GeoInformator.getLong(str: String, cty: String, cntry: String)
-# GET     /long                             controllers.geo.GeoInformator.getLong(street?="", number?="", city?="", country?="")
 
-# Postal Code
+# Postal Code from Nominatim
 GET     /postcode/:str/:nr/:cty/:cntry    controllers.geo.GeoInformator.getPostCodeExplicitNr(str: String, nr: String, cty: String, cntry: String)
 GET     /postcode/:str/:cty/:cntry        controllers.geo.GeoInformator.getPostCode(str: String, cty: String, cntry: String)
-# GET     /postcode                         controllers.geo.GeoInformator.getPostCode(street?="", number?="", city?="", country?="")
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /public/*file                     controllers.Assets.at(path="/public", file)

@@ -1,21 +1,12 @@
 package controllers.geo;
 
-import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
-
 import java.io.IOException;
 
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -23,17 +14,18 @@ import play.mvc.Result;
 public class GeoInformator extends Controller {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private static final String STREET = "street";
-	private static final String CITY = "city";
-	private static final String COUNTRY = "country";
-	private static final String GEOCODE = "geocode";
-	private static final String POSTALCODE = "postalcode";
-	private static final String NOT_FOUND = "Not found (404): ";
-
-	// private static final Client mClient = GeoElasticsearch.ES_CLIENT;
 
 	// for production
 	public GeoInformator() {
+	}
+
+	public static Result getLatAndLong(String query) throws JSONException, IOException {
+		JsonNode latLong = getLatLong(query);
+		if (latLong == null) {
+			return notFound(Constants.NOT_FOUND.concat(query));
+		}
+		return ok(
+				latLong.get("latitude").asText().concat(Constants.SEPARATOR).concat(latLong.get("longitude").asText()));
 	}
 
 	public static Result getPostCodeExplicitNr(String street, String number, String city, String country)
@@ -54,7 +46,7 @@ public class GeoInformator extends Controller {
 	public static Result getPostCode(String street, String city, String country) throws JSONException, IOException {
 		JsonNode postCode = getPostalCode(street, city, country);
 		if (postCode == null) {
-			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
+			return notFound(Constants.NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(postCode.asText());
 	}
@@ -63,7 +55,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
+			return notFound(Constants.NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("latitude").asText());
 	}
@@ -72,7 +64,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
+			return notFound(Constants.NOT_FOUND.concat(street).concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("longitude").asText());
 	}
@@ -83,7 +75,15 @@ public class GeoInformator extends Controller {
 		if (geoNode == null) {
 			return null;
 		}
-		return geoNode.get(POSTALCODE);
+		return geoNode.get(Constants.POSTALCODE);
+	}
+
+	public static JsonNode getLatLong(final String aQuery) throws JSONException, IOException {
+		JsonNode geoNode = getFirstGeoNode(aQuery);
+		if (geoNode == null) {
+			return null;
+		}
+		return geoNode.get(Constants.GEOCODE);
 	}
 
 	public static JsonNode getLatLong(final String aStreet, final String aCity, final String aCountry)
@@ -92,88 +92,34 @@ public class GeoInformator extends Controller {
 		if (geoNode == null) {
 			return null;
 		}
-		return geoNode.get(GEOCODE);
+		return geoNode.get(Constants.GEOCODE);
 	}
 
 	private static JsonNode getFirstGeoNode(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
-		SearchResponse response = queryLocal(aStreet, aCity, aCountry);
+		SearchResponse response = LocalQuery.queryLocal(aStreet, aCity, aCountry);
 		JsonNode geoNode;
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
-			geoNode = createGeoNode(aStreet, aCity, aCountry);
-			addLocal(geoNode);
+			geoNode = NominatimQuery.createGeoNode(aStreet, aCity, aCountry);
+			LocalQuery.addLocal(geoNode);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
 		return geoNode;
 	}
 
-	private static SearchResponse queryLocal(final String aStreet, final String aCity, final String aCountry) {
-		final BoolQueryBuilder queryBuilder = boolQuery();
-		queryBuilder.must(matchQuery(STREET, aStreet)).must(matchQuery(CITY, aCity));
-
-		SearchRequestBuilder searchBuilder = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
-				.setTypes(GeoElasticsearch.ES_TYPE);
-		return searchBuilder.setQuery(queryBuilder).setSize(1).execute().actionGet();
-	}
-
-	private static void addLocal(final JsonNode aGeoNode) {
-		int retries = 40;
-		while (retries > 0) {
-			try {
-				GeoElasticsearch.ES_CLIENT.prepareIndex(GeoElasticsearch.ES_INDEX, GeoElasticsearch.ES_TYPE)
-						.setSource(aGeoNode.toString()).execute().actionGet();
-				GeoElasticsearch.ES_CLIENT.admin().indices().refresh(new RefreshRequest()).actionGet();
-				break; // stop retry-while
-			} catch (NoNodeAvailableException e) {
-				retries--;
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException x) {
-					x.printStackTrace();
-				}
-				System.err.printf("Retry indexing record %s: %s (%s more retries)\n", e.getMessage(), retries);
-			}
-		}
-	}
-
-	private static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
-			throws JSONException, IOException {
-		// grid data of this geo node:
-		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
-		// data enrichment to this geo node:
-		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
-		if (nominatim != null) {
-			double latitude = getLat(nominatim);
-			double longitude = getLong(nominatim);
-			String postalcode = (String) getPostcode(nominatim);
-			geoNode.put(GEOCODE, new ObjectMapper().readTree( //
-					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
-			geoNode.put(POSTALCODE, postalcode);
+	private static JsonNode getFirstGeoNode(final String aQuery) throws JSONException, IOException {
+		SearchResponse response = LocalQuery.queryLocal(aQuery);
+		JsonNode geoNode;
+		if (response == null || response.getHits().getTotalHits() == 0) {
+			// this address information has never been queried before
+			geoNode = WikidataQuery.createGeoNode(aQuery);
+			LocalQuery.addLocal(geoNode);
+		} else {
+			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
 		return geoNode;
-	}
-
-	private static ObjectNode buildGeoNode(final String aStreet, final String aCity, final String aCountry) {
-		ObjectNode geoObject;
-		geoObject = MAPPER.createObjectNode();
-		geoObject.put(STREET, aStreet);
-		geoObject.put(CITY, aCity);
-		geoObject.put(COUNTRY, aCountry);
-		return geoObject;
-	}
-
-	private static double getLat(JSONObject aGeoJson) {
-		return aGeoJson.getDouble("lat");
-	}
-
-	private static double getLong(JSONObject aGeoJson) {
-		return aGeoJson.getDouble("lon");
-	}
-
-	private static Object getPostcode(JSONObject aGeoJson) {
-		return aGeoJson.getJSONObject("address").get("postcode");
 	}
 
 }
