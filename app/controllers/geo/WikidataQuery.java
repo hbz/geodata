@@ -60,13 +60,28 @@ public class WikidataQuery {
 				.getDouble("longitude");
 	}
 
+	public static String getLabel(final JSONObject aGeoJson, final String aId) {
+		final JSONObject labels = aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("labels");
+		if (labels.getJSONObject("de") != null) {
+			return labels.getJSONObject("de").getString("value");
+		}
+		return null;
+	}
+
 	public static ObjectNode createGeoNode(final String aQuery) throws JSONException, IOException {
+
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aQuery);
+
 		// data enrichment to this geo node:
 		JSONObject wikidata = getFirstHit(aQuery);
 		if (wikidata != null) {
 			String id = getId(wikidata);
+			geoNode.put(Constants.ID, id);
+
+			String label = getLabel(wikidata, id);
+			geoNode.put(Constants.LABEL, label);
+
 			double latitude = getLat(wikidata, id);
 			double longitude = getLong(wikidata, id);
 			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
