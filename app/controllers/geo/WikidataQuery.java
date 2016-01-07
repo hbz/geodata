@@ -1,7 +1,9 @@
 package controllers.geo;
 
 import java.io.IOException;
+import java.util.Iterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,14 +48,14 @@ public class WikidataQuery {
 		return result;
 	}
 
-	public static double getLat(JSONObject aGeoJson) {
-		return aGeoJson.getJSONObject("entities").getJSONObject("Q365").getJSONObject("claims").getJSONArray("P625")
+	public static double getLat(final JSONObject aGeoJson, final String aId) {
+		return aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("claims").getJSONArray("P625")
 				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
 				.getDouble("latitude");
 	}
 
-	public static double getLong(JSONObject aGeoJson) {
-		return aGeoJson.getJSONObject("entities").getJSONObject("Q365").getJSONObject("claims").getJSONArray("P625")
+	public static double getLong(final JSONObject aGeoJson, final String aId) {
+		return aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("claims").getJSONArray("P625")
 				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
 				.getDouble("longitude");
 	}
@@ -62,10 +64,11 @@ public class WikidataQuery {
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aQuery);
 		// data enrichment to this geo node:
-		JSONObject wikidata = WikidataQuery.getFirstHit(aQuery);
+		JSONObject wikidata = getFirstHit(aQuery);
 		if (wikidata != null) {
-			double latitude = WikidataQuery.getLat(wikidata);
-			double longitude = WikidataQuery.getLong(wikidata);
+			String id = getId(wikidata);
+			double latitude = getLat(wikidata, id);
+			double longitude = getLong(wikidata, id);
 			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
 					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
 		}
@@ -75,8 +78,33 @@ public class WikidataQuery {
 	private static ObjectNode buildGeoNode(final String aQuery) {
 		ObjectNode geoObject;
 		geoObject = MAPPER.createObjectNode();
-		geoObject.put(Constants.TERM, aQuery);
+		geoObject.put(Constants.SEARCHTERM, aQuery);
 		return geoObject;
+	}
+
+	private static String getId(final JSONObject aWikidataResult) {
+		if (aWikidataResult != null) {
+			Iterator<String> keys = aWikidataResult.getJSONObject("entities").keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				if (isWikidataKey(key)) {
+					return key;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static boolean isWikidataKey(String aKey) {
+		if (StringUtils.isEmpty(aKey))
+			return false;
+		if (aKey.length() < 2)
+			return false;
+		if (!aKey.startsWith("Q"))
+			return false;
+		if (!aKey.substring(1).matches("[0-9]*"))
+			return false;
+		return true;
 	}
 
 }

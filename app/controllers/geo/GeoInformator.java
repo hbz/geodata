@@ -102,7 +102,7 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = NominatimQuery.createGeoNode(aStreet, aCity, aCountry);
-			LocalQuery.addLocal(geoNode);
+			LocalQuery.addLocal(geoNode, GeoElasticsearch.ES_TYPE_NOMINATIM);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
@@ -115,7 +115,7 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = WikidataQuery.createGeoNode(aQuery);
-			LocalQuery.addLocal(geoNode);
+			LocalQuery.addLocal(geoNode, GeoElasticsearch.ES_TYPE_WIKIDATA);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}

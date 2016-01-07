@@ -23,7 +23,8 @@ public class GeoElasticsearch {
 	// ELASTICSEARCH SETTINGS
 	protected static final String ES_CLUSTER = "elasticsearch";
 	protected static final String ES_INDEX = "testindex";
-	protected static final String ES_TYPE = "location";
+	protected static final String ES_TYPE_NOMINATIM = "nominatim_data";
+	protected static final String ES_TYPE_WIKIDATA = "wikidata_data";
 	protected static final String SERVER_NAME = "localhost";
 	protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
 
