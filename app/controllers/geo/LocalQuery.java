@@ -8,18 +8,16 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class LocalQuery {
 
 	public static SearchResponse queryLocal(final String aTerm) {
-		final BoolQueryBuilder queryBuilder = boolQuery();
-		queryBuilder.must(matchQuery(Constants.TERM, aTerm));
-
-		SearchRequestBuilder searchBuilder = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
-				.setTypes(GeoElasticsearch.ES_TYPE);
-		return searchBuilder.setQuery(queryBuilder).setSize(1).execute().actionGet();
+		SearchResponse response = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
+				.setQuery(QueryBuilders.termQuery(Constants.SEARCHTERM, aTerm)).execute().actionGet();
+		return response;
 	}
 
 	public static SearchResponse queryLocal(final String aStreet, final String aCity, final String aCountry) {
@@ -27,15 +25,15 @@ public class LocalQuery {
 		queryBuilder.must(matchQuery(Constants.STREET, aStreet)).must(matchQuery(Constants.CITY, aCity));
 
 		SearchRequestBuilder searchBuilder = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
-				.setTypes(GeoElasticsearch.ES_TYPE);
+				.setTypes(GeoElasticsearch.ES_TYPE_NOMINATIM);
 		return searchBuilder.setQuery(queryBuilder).setSize(1).execute().actionGet();
 	}
 
-	public static void addLocal(final JsonNode aGeoNode) {
+	public static void addLocal(final JsonNode aGeoNode, String aEsType) {
 		int retries = 40;
 		while (retries > 0) {
 			try {
-				GeoElasticsearch.ES_CLIENT.prepareIndex(GeoElasticsearch.ES_INDEX, GeoElasticsearch.ES_TYPE)
+				GeoElasticsearch.ES_CLIENT.prepareIndex(GeoElasticsearch.ES_INDEX, aEsType)
 						.setSource(aGeoNode.toString()).execute().actionGet();
 				GeoElasticsearch.ES_CLIENT.admin().indices().refresh(new RefreshRequest()).actionGet();
 				break; // stop retry-while

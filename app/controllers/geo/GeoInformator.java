@@ -19,13 +19,12 @@ public class GeoInformator extends Controller {
 	public GeoInformator() {
 	}
 
-	public static Result getLatAndLong(String query) throws JSONException, IOException {
-		JsonNode latLong = getLatLong(query);
-		if (latLong == null) {
+	public static Result getWikiData(String query) throws JSONException, IOException {
+		JsonNode geoNode = getFirstGeoNode(query);
+		if (geoNode == null) {
 			return notFound(Constants.NOT_FOUND.concat(query));
 		}
-		return ok(
-				latLong.get("latitude").asText().concat(Constants.SEPARATOR).concat(latLong.get("longitude").asText()));
+		return ok(geoNode.toString());
 	}
 
 	public static Result getPostCodeExplicitNr(String street, String number, String city, String country)
@@ -78,14 +77,6 @@ public class GeoInformator extends Controller {
 		return geoNode.get(Constants.POSTALCODE);
 	}
 
-	public static JsonNode getLatLong(final String aQuery) throws JSONException, IOException {
-		JsonNode geoNode = getFirstGeoNode(aQuery);
-		if (geoNode == null) {
-			return null;
-		}
-		return geoNode.get(Constants.GEOCODE);
-	}
-
 	public static JsonNode getLatLong(final String aStreet, final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
@@ -102,7 +93,7 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = NominatimQuery.createGeoNode(aStreet, aCity, aCountry);
-			LocalQuery.addLocal(geoNode);
+			LocalQuery.addLocal(geoNode, GeoElasticsearch.ES_TYPE_NOMINATIM);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}
@@ -115,7 +106,7 @@ public class GeoInformator extends Controller {
 		if (response == null || response.getHits().getTotalHits() == 0) {
 			// this address information has never been queried before
 			geoNode = WikidataQuery.createGeoNode(aQuery);
-			LocalQuery.addLocal(geoNode);
+			LocalQuery.addLocal(geoNode, GeoElasticsearch.ES_TYPE_WIKIDATA);
 		} else {
 			geoNode = MAPPER.valueToTree(response.getHits().hits()[0].getSource());
 		}

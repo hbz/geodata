@@ -88,7 +88,7 @@ public class GeoInformatorTest {
 	@Test
 	public void testWikidata() throws JSONException, IOException {
 		String query = "Köln";
-		String latAndlong = contentAsString(GeoInformator.getLatAndLong(query));
+		String latAndlong = contentAsString(GeoInformator.getWikiData(query));
 		assertTrue(latAndlong.contains("50.942"));
 		assertTrue(latAndlong.contains("6.95777"));
 	}

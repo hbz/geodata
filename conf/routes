@@ -1,7 +1,7 @@
 GET     /                                 controllers.Application.index()
 
 # Latitude + Longitude from Wikidata
-GET     /geodata                          controllers.geo.GeoInformator.getLatAndLong(q)
+GET     /geodata                          controllers.geo.GeoInformator.getWikiData(q)
 
 # Latitude from Nominatim
 GET     /lat/:str/:nr/:cty/:cntry         controllers.geo.GeoInformator.getLatExplicitNr(str: String, nr: String, cty: String, cntry: String)

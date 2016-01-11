@@ -35,15 +35,15 @@ public class NominatimQuery {
 		return getFirstHit(aStreet + "+" + aNumber, aCity, aCountry);
 	}
 
-	public static double getLat(JSONObject aGeoJson) {
+	public static double getLat(final JSONObject aGeoJson) {
 		return aGeoJson.getDouble("lat");
 	}
 
-	public static double getLong(JSONObject aGeoJson) {
+	public static double getLong(final JSONObject aGeoJson) {
 		return aGeoJson.getDouble("lon");
 	}
 
-	public static Object getPostcode(JSONObject aGeoJson) {
+	public static Object getPostcode(final JSONObject aGeoJson) {
 		return aGeoJson.getJSONObject("address").get("postcode");
 	}
 
@@ -52,11 +52,11 @@ public class NominatimQuery {
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
 		// data enrichment to this geo node:
-		JSONObject nominatim = NominatimQuery.getFirstHit(aStreet, aCity, aCountry);
+		JSONObject nominatim = getFirstHit(aStreet, aCity, aCountry);
 		if (nominatim != null) {
-			double latitude = NominatimQuery.getLat(nominatim);
-			double longitude = NominatimQuery.getLong(nominatim);
-			String postalcode = (String) NominatimQuery.getPostcode(nominatim);
+			double latitude = getLat(nominatim);
+			double longitude = getLong(nominatim);
+			String postalcode = (String) getPostcode(nominatim);
 			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
 					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
 			geoNode.put(Constants.POSTALCODE, postalcode);
