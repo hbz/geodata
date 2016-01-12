@@ -21,7 +21,7 @@ public class IntegrationTest {
 	public void test() {
 		running(testServer(3333, fakeApplication(inMemoryDatabase())), HTMLUNIT, new Callback<TestBrowser>() {
 			public void invoke(TestBrowser browser) {
-				browser.goTo("http://localhost:3333");
+				browser.goTo("http://localhost:3333/geodata/search");
 				assertThat(browser.pageSource()).contains("lobid-geo-enrichment microservice is running");
 			}
 		});
