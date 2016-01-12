@@ -1,4 +1,4 @@
-GET     /geodata/search                           controllers.Application.index()
+GET     /geodata                                  controllers.Application.index()
 
 # Latitude + Longitude from Wikidata
 GET     /geodata/wiki                             controllers.geo.GeoInformator.getWikiData(q)
