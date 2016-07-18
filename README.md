@@ -18,19 +18,19 @@ The application is built using the Playframework and Elasticsearch.
 
 Create and change into a directory where you want to store the project, e.g.:
 
-``mkdir ~/git ; cd ~/git``
+`mkdir ~/git ; cd ~/git`
 
 Get the project from GitHub:
 
-``git clone https://github.com/hbz/lobid-organisations.git``
+`git clone https://github.com/hbz/geodata.git`
 
 Download activator into your home directory in order to launch the Play app:
 
-``cd ~ ; wget http://downloads.typesafe.com/typesafe-activator/1.3.10/typesafe-activator-1.3.10-minimal.zip``
+`cd ~ ; wget http://downloads.typesafe.com/typesafe-activator/1.3.10/typesafe-activator-1.3.10-minimal.zip`
 
 Start the app:
 
-``~/activator-1.3.10-minimal/bin/activator "start 7401"``
+`~/activator-1.3.10-minimal/bin/activator "start 7401"`
 
 When startup is complete (Listening for HTTP on /0.0.0.0:7401), exit with Ctrl+D, output will be logged to target/universal/stage/logs/application.log.
 
@@ -43,5 +43,5 @@ The service runs with an embedded Elasticsearch index. The index is created on s
 
 If you'd like to import the project into eclipse, use the activator command `eclipse` to prepare the project:
 * Change into the project directory, e.g. `cd ~/git`
-* Run ``~/activator-1.3.10-minimal/bin/activator eclipse``
+* Run `~/activator-1.3.10-minimal/bin/activator eclipse`
 * Import the project into your Eclipse, [like this](http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm))
