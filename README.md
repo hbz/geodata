@@ -28,7 +28,11 @@ Download activator into your home directory in order to launch the Play app:
 
 `cd ~ ; wget http://downloads.typesafe.com/typesafe-activator/1.3.10/typesafe-activator-1.3.10-minimal.zip`
 
+`unzip typesafe-activator-1.3.10-minimal.zip`
+
 Start the app:
+
+`cd ~/git/geodata`
 
 `~/activator-1.3.10-minimal/bin/activator "start 7401"`
 
