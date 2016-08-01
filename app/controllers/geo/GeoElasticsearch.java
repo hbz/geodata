@@ -1,5 +1,8 @@
 package controllers.geo;
 
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -9,58 +12,67 @@ import java.util.stream.Collectors;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.common.settings.Settings;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 @SuppressWarnings("javadoc")
 public class GeoElasticsearch {
 
-	// COMMON SETTINGS
-	protected static final String HTTP_AGENT = "java.net.URLConnection, email=<semweb@hbz-nrw.de>";
+    private static final Config CONFIG = ConfigFactory.parseFile(new File("conf/application.conf")).resolve();
 
-	// ELASTICSEARCH SETTINGS
-	protected static final String ES_CLUSTER = "elasticsearch";
-	protected static final String ES_INDEX = "testindex";
-	protected static final String ES_TYPE_NOMINATIM = "nominatim_data";
-	protected static final String ES_TYPE_WIKIDATA = "wikidata_data";
-	protected static final String SERVER_NAME = "localhost";
-	protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
+    // COMMON SETTINGS
+    protected static final String HTTP_AGENT = "java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
-	// ELASTICSEARCH COMPONENTS
-	protected static final Builder CLIENT_SETTINGS = ImmutableSettings.settingsBuilder().put("cluster.name", ES_CLUSTER)
-			.put("index.name", ES_INDEX);
-	private static InetSocketTransportAddress node = new InetSocketTransportAddress(SERVER_NAME, 9300);
-	protected static TransportClient TC = new TransportClient(CLIENT_SETTINGS.put("client.transport.sniff", false)
-			.put("client.transport.ping_timeout", 20, TimeUnit.SECONDS).build());
-	protected static Client ES_CLIENT = TC.addTransportAddress(node);
+    // ELASTICSEARCH SETTINGS
+    protected static final String ES_CLUSTER = "elasticsearch";
+    protected static final String ES_INDEX = "testindex";
+    protected static final String ES_TYPE_NOMINATIM = "nominatim_data";
+    protected static final String ES_TYPE_WIKIDATA = "wikidata_data";
+    protected static final String SERVER_NAME = "localhost";
+    protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
 
-	// for production
-	public GeoElasticsearch() {
-	}
+    // ELASTICSEARCH COMPONENTS
+    protected static final Settings CLIENT_SETTINGS = Settings.settingsBuilder()
+            .put("cluster.name", ES_CLUSTER)
+            .put("index.name", ES_INDEX)
+            .put("client.transport.sniff", false)
+            .put("client.transport.ping_timeout", 20, TimeUnit.SECONDS)
+            .put("path.home", ".")
+            .put("http.port", CONFIG.getString("index.es.port.http"))
+            .put("transport.tcp.port", CONFIG.getString("index.es.port.tcp")).build();
 
-	// for testing
-	public GeoElasticsearch(Client aClient) {
-		ES_CLIENT = aClient;
-	}
+    private static Node node = nodeBuilder().settings(CLIENT_SETTINGS).local(true).node();
+    public static Client ES_CLIENT = node.client();
 
-	public static void createIndex(final Client aClient) throws IOException {
-		String settingsMappings = Files.lines(Paths.get(SETTINGS_FILE)).collect(Collectors.joining());
-		CreateIndexRequestBuilder cirb = aClient.admin().indices().prepareCreate(ES_INDEX);
-		cirb.setSource(settingsMappings);
-		cirb.execute().actionGet();
-	}
+    // for production
+    public GeoElasticsearch() {
+    }
 
-	public static void refreshIndex(final Client aClient) {
-		aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
-	}
+    // for testing
+    public GeoElasticsearch(Client aClient) {
+        ES_CLIENT = aClient;
+    }
 
-	public static boolean hasIndex(final Client aClient) {
-		return aClient.admin().indices().prepareExists(ES_INDEX).execute().actionGet().isExists();
-	}
+    public static void createIndex(final Client aClient) throws IOException {
+        String settingsMappings = Files.lines(Paths.get(SETTINGS_FILE)).collect(Collectors.joining());
+        CreateIndexRequestBuilder cirb = aClient.admin().indices().prepareCreate(ES_INDEX);
+        cirb.setSource(settingsMappings);
+        cirb.execute().actionGet();
+    }
 
-	public static Client getClient() {
-		return ES_CLIENT;
-	}
+    public static void refreshIndex(final Client aClient) {
+        aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
+    }
+
+    public static boolean hasIndex(final Client aClient) {
+        aClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+        return aClient.admin().indices().prepareExists(ES_INDEX).execute().actionGet().isExists();
+    }
+
+    public static Client getClient() {
+        return ES_CLIENT;
+    }
 }
