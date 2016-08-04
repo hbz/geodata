@@ -1,5 +1,6 @@
 package controllers.geo;
 
+@SuppressWarnings("javadoc")
 public class Constants {
 
 	public static final String SEARCHTERM = "searchterm";

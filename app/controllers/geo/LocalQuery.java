@@ -12,8 +12,17 @@ import org.elasticsearch.index.query.QueryBuilders;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Methods to query the local Elasticsearch index
+ */
 public class LocalQuery {
 
+	/**
+	 * Query the local Elasticsearch index
+	 * 
+	 * @param aTerm A search term
+	 * @return The search result from the index
+	 */
 	public static SearchResponse queryLocal(final String aTerm) {
 		SearchResponse response =
 				GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
@@ -22,6 +31,14 @@ public class LocalQuery {
 		return response;
 	}
 
+	/**
+	 * Query the local Elasticsearch index with a given address
+	 * 
+	 * @param aStreet The treet name of the address
+	 * @param aCity The city name of the address
+	 * @param aCountry The country name of the address
+	 * @return The search result from the index
+	 */
 	public static SearchResponse queryLocal(final String aStreet,
 			final String aCity, final String aCountry) {
 		final BoolQueryBuilder queryBuilder = boolQuery();
@@ -35,6 +52,13 @@ public class LocalQuery {
 				.actionGet();
 	}
 
+	/**
+	 * Add a geo information to the Elasticsearch index
+	 * 
+	 * @param aGeoNode The geo node to be added
+	 * @param aEsType The type of data of the geo node (nominatim_data vs.
+	 *          wikidata_data)
+	 */
 	public static void addLocal(final JsonNode aGeoNode, String aEsType) {
 		int retries = 40;
 		while (retries > 0) {

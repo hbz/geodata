@@ -21,6 +21,15 @@ public class WikidataQuery {
 	final private static String PATH_STEP_2 = "/wiki/Special:EntityData/";
 	final private static String SUFFIX_STEP_2 = ".json";
 
+	/**
+	 * Get the first hit of the wikidata search results
+	 * 
+	 * @param aSearchKey The wikidata search query
+	 * @return The first hit of the wikidata search results
+	 * @throws JSONException Thrown if wikidata search hits cannot be extracted
+	 *           from results or first Json Object cannot be returned from hits
+	 * @throws IOException Thrown if Json cannot be read from URL
+	 */
 	public static JSONObject getFirstHit(final String aSearchKey)
 			throws JSONException, IOException {
 		String queryString = aSearchKey.replaceAll(" ", "%20");
@@ -51,21 +60,21 @@ public class WikidataQuery {
 		return result;
 	}
 
-	public static double getLat(final JSONObject aGeoJson, final String aId) {
+	private static double getLat(final JSONObject aGeoJson, final String aId) {
 		return aGeoJson.getJSONObject("entities").getJSONObject(aId)
 				.getJSONObject("claims").getJSONArray("P625").getJSONObject(0)
 				.getJSONObject("mainsnak").getJSONObject("datavalue")
 				.getJSONObject("value").getDouble("latitude");
 	}
 
-	public static double getLong(final JSONObject aGeoJson, final String aId) {
+	private static double getLong(final JSONObject aGeoJson, final String aId) {
 		return aGeoJson.getJSONObject("entities").getJSONObject(aId)
 				.getJSONObject("claims").getJSONArray("P625").getJSONObject(0)
 				.getJSONObject("mainsnak").getJSONObject("datavalue")
 				.getJSONObject("value").getDouble("longitude");
 	}
 
-	public static String getLabel(final JSONObject aGeoJson, final String aId) {
+	private static String getLabel(final JSONObject aGeoJson, final String aId) {
 		final JSONObject labels = aGeoJson.getJSONObject("entities")
 				.getJSONObject(aId).getJSONObject("labels");
 		if (labels.getJSONObject("de") != null) {
@@ -74,6 +83,16 @@ public class WikidataQuery {
 		return null;
 	}
 
+	/**
+	 * Create a new Nominatim Geo Node to be added to the local Elasticsearch
+	 * index
+	 * 
+	 * @param aQuery The query that is used to get the information from wikidata
+	 * @return The Geo Node for geo information
+	 * @throws JSONException Thrown if Json cannot be read from URL or first Json
+	 *           Object cannot be returned from result set
+	 * @throws IOException Thrown if Json cannot be read from URL
+	 */
 	public static ObjectNode createGeoNode(final String aQuery)
 			throws JSONException, IOException {
 

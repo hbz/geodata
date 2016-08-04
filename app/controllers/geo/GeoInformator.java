@@ -11,6 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+/**
+ * Methods to trigger geo lookups on the index
+ *
+ */
+@SuppressWarnings("javadoc")
 public class GeoInformator extends Controller {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -19,6 +24,12 @@ public class GeoInformator extends Controller {
 	public GeoInformator() {
 	}
 
+	/**
+	 * @param query Wiki data query
+	 * @return The result of wiki data query
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getWikiData(String query)
 			throws JSONException, IOException {
 		JsonNode geoNode = getFirstGeoNode(query);
@@ -28,21 +39,64 @@ public class GeoInformator extends Controller {
 		return ok(geoNode.toString());
 	}
 
+	/**
+	 * Get the postal code for a given street address WITH house number
+	 * 
+	 * @param street The name of the street to find the postal code for
+	 * @param number The house number to the find the postal code for
+	 * @param city The name of the city to find the postal code for
+	 * @param country The name of the country to find the postal code for
+	 * @return The postal code for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getPostCodeExplicitNr(String street, String number,
 			String city, String country) throws JSONException, IOException {
 		return getPostCode(street + " " + number, city, country);
 	}
 
+	/**
+	 * Get the lat coordinate for a given street address WITH house number
+	 * 
+	 * @param street The name of the street to find the coordinate for
+	 * @param number The house number to the find the coordinate
+	 * @param city The name of the city to find the coordinates for
+	 * @param country The name of the country to find the coordinates for
+	 * @return The lat coordinate for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getLatExplicitNr(String street, String number,
 			String city, String country) throws JSONException, IOException {
 		return getLat(street + " " + number, city, country);
 	}
 
+	/**
+	 * Get the lon coordinate for a given street address WITH house number
+	 * 
+	 * @param street The name of the street to find the coordinate for
+	 * @param number The house number to the find the coordinate for
+	 * @param city The name of the city to find the coordinate for
+	 * @param country The name of the country to find the coordinate for
+	 * @return The lon coordinate for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getLongExplicitNr(String street, String number,
 			String city, String country) throws JSONException, IOException {
 		return getLong(street + " " + number, city, country);
 	}
 
+	/**
+	 * Get the postal code for a given street address WITHOUT house number
+	 * 
+	 * @param street The name of the street to find the postal code for
+	 * @param city The name of the city to find the postal code for
+	 * @param country The name of the country to find the postal code for
+	 * @return The postal code for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getPostCode(String street, String city, String country)
 			throws JSONException, IOException {
 		JsonNode postCode = getPostalCode(street, city, country);
@@ -53,6 +107,16 @@ public class GeoInformator extends Controller {
 		return ok(postCode.asText());
 	}
 
+	/**
+	 * Get the lat coordinate for a given street address WITHOUT house number
+	 * 
+	 * @param street The name of the street to find the coordinate for
+	 * @param city The name of the city to find the coordinate for
+	 * @param country The name of the country to find the coordinate for
+	 * @return The lat coordinate for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getLat(final String street, final String city,
 			final String country) throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
@@ -63,6 +127,16 @@ public class GeoInformator extends Controller {
 		return ok(latLong.get("latitude").asText());
 	}
 
+	/**
+	 * Get the lon coordinate for a given street address WITHOUT house number
+	 * 
+	 * @param street The name of the street to find the coordinate for
+	 * @param city The name of the city to find the coordinate for
+	 * @param country The name of the country to find the coordinate for
+	 * @return The lon coordinate for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
 	public static Result getLong(final String street, final String city,
 			final String country) throws JSONException, IOException {
 		JsonNode latLong = getLatLong(street, city, country);
@@ -73,6 +147,25 @@ public class GeoInformator extends Controller {
 		return ok(latLong.get("longitude").asText());
 	}
 
+	/**
+	 * Get the lat coordinate for a given street address WITHOUT house number
+	 * 
+	 * @param street The name of the street to find the coordinates for
+	 * @param city The name of the city to find the coordinates for
+	 * @param country The name of the country to find the coordinates for
+	 * @return The lat and lon coordinates for the given street address
+	 * @throws JSONException Thrown if first hit of json result cannot be returned
+	 * @throws IOException Thrown if first hit of json result cannot be returned
+	 */
+	public static JsonNode getLatLong(final String street, final String city,
+			final String country) throws JSONException, IOException {
+		JsonNode geoNode = getFirstGeoNode(street, city, country);
+		if (geoNode == null) {
+			return null;
+		}
+		return geoNode.get(Constants.GEOCODE);
+	}
+
 	private static JsonNode getPostalCode(final String aStreet,
 			final String aCity, final String aCountry)
 			throws JSONException, IOException {
@@ -81,15 +174,6 @@ public class GeoInformator extends Controller {
 			return null;
 		}
 		return geoNode.get(Constants.POSTALCODE);
-	}
-
-	public static JsonNode getLatLong(final String aStreet, final String aCity,
-			final String aCountry) throws JSONException, IOException {
-		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
-		if (geoNode == null) {
-			return null;
-		}
-		return geoNode.get(Constants.GEOCODE);
 	}
 
 	private static JsonNode getFirstGeoNode(final String aStreet,

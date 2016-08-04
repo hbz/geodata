@@ -18,6 +18,9 @@ import org.elasticsearch.node.Node;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+/**
+ * Configuration and creation of Elasticsearch index
+ */
 @SuppressWarnings("javadoc")
 public class GeoElasticsearch {
 
@@ -25,6 +28,7 @@ public class GeoElasticsearch {
 			ConfigFactory.parseFile(new File("conf/application.conf")).resolve();
 
 	// COMMON SETTINGS
+
 	protected static final String HTTP_AGENT =
 			"java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
@@ -58,6 +62,12 @@ public class GeoElasticsearch {
 		ES_CLIENT = aClient;
 	}
 
+	/**
+	 * Create an new Elasticsearch index
+	 * 
+	 * @param aClient An Elasticsearch client
+	 * @throws IOException Thrown if settings file cannot be read
+	 */
 	public static void createIndex(final Client aClient) throws IOException {
 		String settingsMappings =
 				Files.lines(Paths.get(SETTINGS_FILE)).collect(Collectors.joining());
@@ -71,6 +81,12 @@ public class GeoElasticsearch {
 		aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
 
+	/**
+	 * Check whether the Elasticsearch index already exists
+	 * 
+	 * @param aClient An Elasticsearch index
+	 * @return Whether index already exists or not
+	 */
 	public static boolean hasIndex(final Client aClient) {
 		aClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
 				.actionGet();

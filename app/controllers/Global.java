@@ -7,6 +7,7 @@ import play.Application;
 import play.GlobalSettings;
 import play.Logger;
 
+@SuppressWarnings("javadoc")
 public class Global extends GlobalSettings {
 
 	@Override

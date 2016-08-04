@@ -13,6 +13,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Helper methods for queries
+ */
+@SuppressWarnings("javadoc")
 public class QueryHelpers {
 
 	final private static String[] mBadSpecialChars =
@@ -28,45 +32,42 @@ public class QueryHelpers {
 			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
 		connection.setRequestProperty("http.agent", GeoElasticsearch.HTTP_AGENT);
-		InputStream is = connection.getInputStream();
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(is, Charset.forName("UTF-8")));
-			int value;
-			while ((value = reader.read()) != -1) {
-				sb.append((char) value);
+		try (InputStream is = connection.getInputStream()) {
+			StringBuilder sb = new StringBuilder();
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(is, Charset.forName("UTF-8")));
+				int value;
+				while ((value = reader.read()) != -1) {
+					sb.append((char) value);
+				}
+				Thread.sleep(aSleepMs);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			Thread.sleep(aSleepMs);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			is.close();
+			return new JSONObject(sb.toString());
 		}
-		return new JSONObject(sb.toString());
 	}
 
 	public static JSONArray readJsonArrayFromUrl(String aUrl, int aSleepMs)
 			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
 		connection.setRequestProperty("http.agent", GeoElasticsearch.HTTP_AGENT);
-		InputStream is = connection.getInputStream();
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(is, Charset.forName("UTF-8")));
-
-			int value;
-			while ((value = reader.read()) != -1) {
-				sb.append((char) value);
+		try (InputStream is = connection.getInputStream()) {
+			StringBuilder sb = new StringBuilder();
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(is, Charset.forName("UTF-8")));
+				int value;
+				while ((value = reader.read()) != -1) {
+					sb.append((char) value);
+				}
+				Thread.sleep(aSleepMs);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			Thread.sleep(aSleepMs);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			is.close();
+			return new JSONArray(sb.toString());
 		}
-		return new JSONArray(sb.toString());
 	}
 
 	public static String repairSpecialChars(String aQuery) {
