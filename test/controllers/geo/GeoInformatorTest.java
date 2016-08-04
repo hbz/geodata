@@ -17,7 +17,8 @@ public class GeoInformatorTest {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String postalCode = contentAsString(GeoInformator.getPostCode(street, city, country));
+		String postalCode =
+				contentAsString(GeoInformator.getPostCode(street, city, country));
 		assertEquals("50674", postalCode);
 	}
 
@@ -27,7 +28,9 @@ public class GeoInformatorTest {
 		String city = "Köln";
 		String country = "Germany";
 		String latLong = GeoInformator.getLatLong(street, city, country).toString();
-		assertEquals("{\"latitude\":\"50.9341361\",\"longitude\":\"6.93551400842729\"}", latLong);
+		assertEquals(
+				"{\"latitude\":\"50.9341361\",\"longitude\":\"6.93551400842729\"}",
+				latLong);
 	}
 
 	@Test
@@ -35,7 +38,8 @@ public class GeoInformatorTest {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String latitude = contentAsString(GeoInformator.getLat(street, city, country));
+		String latitude =
+				contentAsString(GeoInformator.getLat(street, city, country));
 		assertEquals("50.9341361", latitude);
 	}
 
@@ -44,7 +48,8 @@ public class GeoInformatorTest {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
-		String longitude = contentAsString(GeoInformator.getLong(street, city, country));
+		String longitude =
+				contentAsString(GeoInformator.getLong(street, city, country));
 		assertEquals("6.93551400842729", longitude);
 	}
 
@@ -54,7 +59,8 @@ public class GeoInformatorTest {
 		String number = "6";
 		String city = "Köln";
 		String country = "Germany";
-		String longitude = contentAsString(GeoInformator.getLongExplicitNr(street, number, city, country));
+		String longitude = contentAsString(
+				GeoInformator.getLongExplicitNr(street, number, city, country));
 		assertEquals("6.93551400842729", longitude);
 	}
 
@@ -64,7 +70,9 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(GeoInformator.getLatExplicitNr(street, number, city, country)).contains("404"));
+		assertTrue(contentAsString(
+				GeoInformator.getLatExplicitNr(street, number, city, country))
+						.contains("404"));
 	}
 
 	@Test
@@ -73,16 +81,21 @@ public class GeoInformatorTest {
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(GeoInformator.getLongExplicitNr(street, number, city, country)).contains("404"));
+		assertTrue(contentAsString(
+				GeoInformator.getLongExplicitNr(street, number, city, country))
+						.contains("404"));
 	}
 
 	@Test
-	public void testNonExistingAddressPostcode() throws JSONException, IOException {
+	public void testNonExistingAddressPostcode()
+			throws JSONException, IOException {
 		String street = "All people are equal";
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(GeoInformator.getPostCodeExplicitNr(street, number, city, country)).contains("404"));
+		assertTrue(contentAsString(
+				GeoInformator.getPostCodeExplicitNr(street, number, city, country))
+						.contains("404"));
 	}
 
 	@Test

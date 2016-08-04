@@ -16,10 +16,12 @@ public class NominatimQuery {
 	final private static String mAuthority = "nominatim.openstreetmap.org";
 	final private static String mPath = "/search.php";
 
-	public static JSONObject getFirstHit(final String aStreetPlusNumber, final String aCity, final String aCountry)
+	public static JSONObject getFirstHit(final String aStreetPlusNumber,
+			final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		String queryString = String
-				.format("q=%s%s%s%s%s&addressdetails=1&format=json", aStreetPlusNumber, "%2C+", aCity, "%2C+", aCountry) //
+				.format("q=%s%s%s%s%s&addressdetails=1&format=json", aStreetPlusNumber,
+						"%2C+", aCity, "%2C+", aCountry) //
 				.replaceAll(" ", "%20");
 		queryString = QueryHelpers.repairSpecialChars(queryString);
 		String url = mScheme + "://" + mAuthority + mPath + "?" + queryString;
@@ -30,8 +32,9 @@ public class NominatimQuery {
 		return results.getJSONObject(0);
 	}
 
-	public static JSONObject getFirstHit(final String aStreet, final String aNumber, final String aCity,
-			final String aCountry) throws JSONException, IOException {
+	public static JSONObject getFirstHit(final String aStreet,
+			final String aNumber, final String aCity, final String aCountry)
+			throws JSONException, IOException {
 		return getFirstHit(aStreet + "+" + aNumber, aCity, aCountry);
 	}
 
@@ -47,7 +50,8 @@ public class NominatimQuery {
 		return aGeoJson.getJSONObject("address").get("postcode");
 	}
 
-	public static ObjectNode createGeoNode(final String aStreet, final String aCity, final String aCountry)
+	public static ObjectNode createGeoNode(final String aStreet,
+			final String aCity, final String aCountry)
 			throws JSONException, IOException {
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
@@ -57,14 +61,17 @@ public class NominatimQuery {
 			double latitude = getLat(nominatim);
 			double longitude = getLong(nominatim);
 			String postalcode = (String) getPostcode(nominatim);
-			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
-					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+			geoNode.put(Constants.GEOCODE,
+					new ObjectMapper().readTree( //
+							String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+									latitude, longitude)));
 			geoNode.put(Constants.POSTALCODE, postalcode);
 		}
 		return geoNode;
 	}
 
-	private static ObjectNode buildGeoNode(final String aStreet, final String aCity, final String aCountry) {
+	private static ObjectNode buildGeoNode(final String aStreet,
+			final String aCity, final String aCountry) {
 		ObjectNode geoObject;
 		geoObject = MAPPER.createObjectNode();
 		geoObject.put(Constants.STREET, aStreet);

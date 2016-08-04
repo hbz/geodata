@@ -15,20 +15,24 @@ import org.json.JSONObject;
 
 public class QueryHelpers {
 
-	final private static String[] mBadSpecialChars = { "Ã", "Ã", "Ã", "Ã¤", "Ã¶", "Ã¼", "Ã" };
-	final private static String[] mGoodSpecialChars = { "Ä", "Ö", "Ü", "ä", "ö", "ü", "ß" };
+	final private static String[] mBadSpecialChars =
+			{ "Ã", "Ã", "Ã", "Ã¤", "Ã¶", "Ã¼", "Ã" };
+	final private static String[] mGoodSpecialChars =
+			{ "Ä", "Ö", "Ü", "ä", "ö", "ü", "ß" };
 
 	static {
-		assert(mBadSpecialChars.length == mGoodSpecialChars.length);
+		assert (mBadSpecialChars.length == mGoodSpecialChars.length);
 	}
 
-	public static JSONObject readJsonObjectFromUrl(String aUrl, int aSleepMs) throws IOException, JSONException {
+	public static JSONObject readJsonObjectFromUrl(String aUrl, int aSleepMs)
+			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
 		connection.setRequestProperty("http.agent", GeoElasticsearch.HTTP_AGENT);
 		InputStream is = connection.getInputStream();
 		StringBuilder sb = new StringBuilder();
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(is, Charset.forName("UTF-8")));
 			int value;
 			while ((value = reader.read()) != -1) {
 				sb.append((char) value);
@@ -42,13 +46,15 @@ public class QueryHelpers {
 		return new JSONObject(sb.toString());
 	}
 
-	public static JSONArray readJsonArrayFromUrl(String aUrl, int aSleepMs) throws IOException, JSONException {
+	public static JSONArray readJsonArrayFromUrl(String aUrl, int aSleepMs)
+			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
 		connection.setRequestProperty("http.agent", GeoElasticsearch.HTTP_AGENT);
 		InputStream is = connection.getInputStream();
 		StringBuilder sb = new StringBuilder();
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(is, Charset.forName("UTF-8")));
 
 			int value;
 			while ((value = reader.read()) != -1) {

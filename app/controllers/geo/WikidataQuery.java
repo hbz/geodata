@@ -16,11 +16,13 @@ public class WikidataQuery {
 	final private static ObjectMapper MAPPER = new ObjectMapper();
 	final private static String SCHEME = "https";
 	final private static String AUTHORITY = "www.wikidata.org";
-	final private static String PATH_STEP_1 = "/w/api.php?action=query&list=search&format=json&srsearch=";
+	final private static String PATH_STEP_1 =
+			"/w/api.php?action=query&list=search&format=json&srsearch=";
 	final private static String PATH_STEP_2 = "/wiki/Special:EntityData/";
 	final private static String SUFFIX_STEP_2 = ".json";
 
-	public static JSONObject getFirstHit(final String aSearchKey) throws JSONException, IOException {
+	public static JSONObject getFirstHit(final String aSearchKey)
+			throws JSONException, IOException {
 		String queryString = aSearchKey.replaceAll(" ", "%20");
 		queryString = QueryHelpers.repairSpecialChars(queryString);
 		JSONArray hitsStep1 = wikidataQueryStep1(queryString, 500);
@@ -33,42 +35,47 @@ public class WikidataQuery {
 		return record;
 	}
 
-	private static JSONArray wikidataQueryStep1(final String aQueryString, final int aSleepMs)
-			throws JSONException, IOException {
+	private static JSONArray wikidataQueryStep1(final String aQueryString,
+			final int aSleepMs) throws JSONException, IOException {
 		String url = SCHEME + "://" + AUTHORITY + PATH_STEP_1 + "?" + aQueryString;
 		JSONObject result = QueryHelpers.readJsonObjectFromUrl(url, aSleepMs);
 		JSONArray hits = result.getJSONObject("query").getJSONArray("search");
 		return hits;
 	}
 
-	private static JSONObject wikidataQueryStep2(final String aQueryId, final int aSleepMs)
-			throws JSONException, IOException {
-		String url = SCHEME + "://" + AUTHORITY + PATH_STEP_2 + aQueryId + SUFFIX_STEP_2;
+	private static JSONObject wikidataQueryStep2(final String aQueryId,
+			final int aSleepMs) throws JSONException, IOException {
+		String url =
+				SCHEME + "://" + AUTHORITY + PATH_STEP_2 + aQueryId + SUFFIX_STEP_2;
 		JSONObject result = QueryHelpers.readJsonObjectFromUrl(url, aSleepMs);
 		return result;
 	}
 
 	public static double getLat(final JSONObject aGeoJson, final String aId) {
-		return aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("claims").getJSONArray("P625")
-				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
-				.getDouble("latitude");
+		return aGeoJson.getJSONObject("entities").getJSONObject(aId)
+				.getJSONObject("claims").getJSONArray("P625").getJSONObject(0)
+				.getJSONObject("mainsnak").getJSONObject("datavalue")
+				.getJSONObject("value").getDouble("latitude");
 	}
 
 	public static double getLong(final JSONObject aGeoJson, final String aId) {
-		return aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("claims").getJSONArray("P625")
-				.getJSONObject(0).getJSONObject("mainsnak").getJSONObject("datavalue").getJSONObject("value")
-				.getDouble("longitude");
+		return aGeoJson.getJSONObject("entities").getJSONObject(aId)
+				.getJSONObject("claims").getJSONArray("P625").getJSONObject(0)
+				.getJSONObject("mainsnak").getJSONObject("datavalue")
+				.getJSONObject("value").getDouble("longitude");
 	}
 
 	public static String getLabel(final JSONObject aGeoJson, final String aId) {
-		final JSONObject labels = aGeoJson.getJSONObject("entities").getJSONObject(aId).getJSONObject("labels");
+		final JSONObject labels = aGeoJson.getJSONObject("entities")
+				.getJSONObject(aId).getJSONObject("labels");
 		if (labels.getJSONObject("de") != null) {
 			return labels.getJSONObject("de").getString("value");
 		}
 		return null;
 	}
 
-	public static ObjectNode createGeoNode(final String aQuery) throws JSONException, IOException {
+	public static ObjectNode createGeoNode(final String aQuery)
+			throws JSONException, IOException {
 
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aQuery);
@@ -84,8 +91,10 @@ public class WikidataQuery {
 
 			double latitude = getLat(wikidata, id);
 			double longitude = getLong(wikidata, id);
-			geoNode.put(Constants.GEOCODE, new ObjectMapper().readTree( //
-					String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}", latitude, longitude)));
+			geoNode.put(Constants.GEOCODE,
+					new ObjectMapper().readTree( //
+							String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+									latitude, longitude)));
 		}
 		return geoNode;
 	}

@@ -15,7 +15,8 @@ public class WikidataQueryTest {
 	public void testGetFirstHit() throws JSONException, IOException {
 		String search = "Nordrhein Westfalen";
 		JSONObject result = WikidataQuery.getFirstHit(search);
-		assertTrue(result.toString().contains("Land der Bundesrepublik Deutschland"));
+		assertTrue(
+				result.toString().contains("Land der Bundesrepublik Deutschland"));
 	}
 
 }

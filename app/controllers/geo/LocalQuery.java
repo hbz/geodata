@@ -15,27 +15,35 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class LocalQuery {
 
 	public static SearchResponse queryLocal(final String aTerm) {
-		SearchResponse response = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
-				.setQuery(QueryBuilders.termQuery(Constants.SEARCHTERM, aTerm)).execute().actionGet();
+		SearchResponse response =
+				GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
+						.setQuery(QueryBuilders.termQuery(Constants.SEARCHTERM, aTerm))
+						.execute().actionGet();
 		return response;
 	}
 
-	public static SearchResponse queryLocal(final String aStreet, final String aCity, final String aCountry) {
+	public static SearchResponse queryLocal(final String aStreet,
+			final String aCity, final String aCountry) {
 		final BoolQueryBuilder queryBuilder = boolQuery();
-		queryBuilder.must(matchQuery(Constants.STREET, aStreet)).must(matchQuery(Constants.CITY, aCity));
+		queryBuilder.must(matchQuery(Constants.STREET, aStreet))
+				.must(matchQuery(Constants.CITY, aCity));
 
-		SearchRequestBuilder searchBuilder = GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
-				.setTypes(GeoElasticsearch.ES_TYPE_NOMINATIM);
-		return searchBuilder.setQuery(queryBuilder).setSize(1).execute().actionGet();
+		SearchRequestBuilder searchBuilder =
+				GeoElasticsearch.ES_CLIENT.prepareSearch(GeoElasticsearch.ES_INDEX)
+						.setTypes(GeoElasticsearch.ES_TYPE_NOMINATIM);
+		return searchBuilder.setQuery(queryBuilder).setSize(1).execute()
+				.actionGet();
 	}
 
 	public static void addLocal(final JsonNode aGeoNode, String aEsType) {
 		int retries = 40;
 		while (retries > 0) {
 			try {
-				GeoElasticsearch.ES_CLIENT.prepareIndex(GeoElasticsearch.ES_INDEX, aEsType)
+				GeoElasticsearch.ES_CLIENT
+						.prepareIndex(GeoElasticsearch.ES_INDEX, aEsType)
 						.setSource(aGeoNode.toString()).execute().actionGet();
-				GeoElasticsearch.ES_CLIENT.admin().indices().refresh(new RefreshRequest()).actionGet();
+				GeoElasticsearch.ES_CLIENT.admin().indices()
+						.refresh(new RefreshRequest()).actionGet();
 				break; // stop retry-while
 			} catch (NoNodeAvailableException e) {
 				retries--;
@@ -44,7 +52,8 @@ public class LocalQuery {
 				} catch (InterruptedException x) {
 					x.printStackTrace();
 				}
-				System.err.printf("Retry indexing record %s: %s (%s more retries)\n", e.getMessage(), retries);
+				System.err.printf("Retry indexing record %s: %s (%s more retries)\n",
+						e.getMessage(), retries);
 			}
 		}
 	}
