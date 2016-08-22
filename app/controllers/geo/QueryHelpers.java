@@ -16,7 +16,6 @@ import org.json.JSONObject;
 /**
  * Helper methods for queries
  */
-@SuppressWarnings("javadoc")
 public class QueryHelpers {
 
 	final private static String[] mBadSpecialChars =
@@ -28,6 +27,19 @@ public class QueryHelpers {
 		assert (mBadSpecialChars.length == mGoodSpecialChars.length);
 	}
 
+	/**
+	 * Method to read a JSON object from a URL
+	 * 
+	 * @param aUrl The url to read the JSON object from
+	 * @param aSleepMs The number of miliseconds for the thread to sleep after
+	 *          reading the input stream
+	 * @return The JSON string read from the URL as a JSON objects
+	 * @throws IOException Thrown if the connection cannot be opened, the input
+	 *           stream cannot be received from the connection or the reader
+	 *           cannot read the input stream
+	 * @throws JSONException Thrown if the string from the input stream cannot be
+	 *           converted to an JSON object
+	 */
 	public static JSONObject readJsonObjectFromUrl(String aUrl, int aSleepMs)
 			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
@@ -49,6 +61,19 @@ public class QueryHelpers {
 		}
 	}
 
+	/**
+	 * Method to read a JSON array from a URL
+	 * 
+	 * @param aUrl The url to read the JSON array from
+	 * @param aSleepMs aSleepMs The number of miliseconds for the thread to sleep
+	 *          after reading the input stream
+	 * @return The string from the input stream as a JSON array object
+	 * @throws IOException Thrown if the connection cannot be opened, the input
+	 *           stream cannot be received from the connection or the reader
+	 *           cannot read the input stream
+	 * @throws JSONException Thrown if the string from the input stream cannot be
+	 *           converted to an JSON array object
+	 */
 	public static JSONArray readJsonArrayFromUrl(String aUrl, int aSleepMs)
 			throws IOException, JSONException {
 		URLConnection connection = new URL(aUrl).openConnection();
@@ -70,6 +95,12 @@ public class QueryHelpers {
 		}
 	}
 
+	/**
+	 * Method to replace special characters (like Umlaute) in a query string
+	 * 
+	 * @param aQuery The query string containing the special characters
+	 * @return The query string with the fixed characters
+	 */
 	public static String repairSpecialChars(String aQuery) {
 		return StringUtils.replaceEach(aQuery, mBadSpecialChars, mGoodSpecialChars);
 	}

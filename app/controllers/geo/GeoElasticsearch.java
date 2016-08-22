@@ -21,26 +21,54 @@ import com.typesafe.config.ConfigFactory;
 /**
  * Configuration and creation of Elasticsearch index
  */
-@SuppressWarnings("javadoc")
 public class GeoElasticsearch {
 
 	private static final Config CONFIG =
 			ConfigFactory.parseFile(new File("conf/application.conf")).resolve();
 
-	// COMMON SETTINGS
-
+	/**
+	 * Http agent for URLConnection
+	 */
 	protected static final String HTTP_AGENT =
 			"java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
 	// ELASTICSEARCH SETTINGS
+	/**
+	 * The name of the Elasticsearch cluster to be used for the geo data
+	 */
 	protected static final String ES_CLUSTER = "elasticsearch";
+
+	/**
+	 * The name of the Elasticsearch index to be used for the geo data
+	 */
 	protected static final String ES_INDEX = "testindex";
+
+	/**
+	 * The name of the Elasticsearch type for data from Nominatim to be used for
+	 * the geo data
+	 */
 	protected static final String ES_TYPE_NOMINATIM = "nominatim_data";
+
+	/**
+	 * The name of the Elasticsearch type for data from Wikidata to be used for
+	 * the geo data
+	 */
 	protected static final String ES_TYPE_WIKIDATA = "wikidata_data";
+
+	/**
+	 * The name of the server name for the Elasticsearch index
+	 */
 	protected static final String SERVER_NAME = "localhost";
+
+	/**
+	 * The path to the settings file for the Elasticsearch index
+	 */
 	protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
 
 	// ELASTICSEARCH COMPONENTS
+	/**
+	 * Settings for the Elasticserach client
+	 */
 	protected static final Settings CLIENT_SETTINGS = Settings.settingsBuilder()
 			.put("cluster.name", ES_CLUSTER).put("index.name", ES_INDEX)
 			.put("client.transport.sniff", false)
@@ -51,13 +79,23 @@ public class GeoElasticsearch {
 
 	private static Node node =
 			nodeBuilder().settings(CLIENT_SETTINGS).local(true).node();
+
+	/**
+	 * The Elasticserach client
+	 */
 	public static Client ES_CLIENT = node.client();
 
-	// for production
+	/**
+	 * Constructor for production
+	 */
 	public GeoElasticsearch() {
 	}
 
-	// for testing
+	/**
+	 * Constructor for testing purposes
+	 * 
+	 * @param aClient An Elasticsearch client
+	 */
 	public GeoElasticsearch(Client aClient) {
 		ES_CLIENT = aClient;
 	}
@@ -77,6 +115,11 @@ public class GeoElasticsearch {
 		cirb.execute().actionGet();
 	}
 
+	/**
+	 * Refresh the Elasticsearch index
+	 * 
+	 * @param aClient An Elasticsearch client
+	 */
 	public static void refreshIndex(final Client aClient) {
 		aClient.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
@@ -94,6 +137,9 @@ public class GeoElasticsearch {
 				.actionGet().isExists();
 	}
 
+	/**
+	 * @return The Elasticsearch client
+	 */
 	public static Client getClient() {
 		return ES_CLIENT;
 	}

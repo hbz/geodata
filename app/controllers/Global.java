@@ -7,7 +7,10 @@ import play.Application;
 import play.GlobalSettings;
 import play.Logger;
 
-@SuppressWarnings("javadoc")
+/**
+ * Global class that manages what happens when the application is started and
+ * stopped
+ */
 public class Global extends GlobalSettings {
 
 	@Override

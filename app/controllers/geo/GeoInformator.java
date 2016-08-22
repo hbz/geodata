@@ -15,12 +15,13 @@ import play.mvc.Result;
  * Methods to trigger geo lookups on the index
  *
  */
-@SuppressWarnings("javadoc")
 public class GeoInformator extends Controller {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	// for production
+	/**
+	 * Constructor for production
+	 */
 	public GeoInformator() {
 	}
 
