@@ -1,5 +1,8 @@
 package controllers.geo;
 
+/**
+ * Constants used across the classes of the app
+ */
 public class Constants {
 
 	public static final String SEARCHTERM = "searchterm";

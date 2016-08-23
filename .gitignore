@@ -14,6 +14,7 @@ dist
 /.classpath
 /.project
 /RUNNING_PID
-/.settings
 /project/*-shim.sbt
 /data
+.settings/org.scala-ide.play2.prefs
+.settings/org.scala-ide.sdt.core.prefs
