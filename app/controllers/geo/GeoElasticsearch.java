@@ -26,50 +26,17 @@ public class GeoElasticsearch {
 	private static final Config CONFIG =
 			ConfigFactory.parseFile(new File("conf/application.conf")).resolve();
 
-	/**
-	 * Http agent for URLConnection
-	 */
-	protected static final String HTTP_AGENT =
+	static final String HTTP_AGENT =
 			"java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
 	// ELASTICSEARCH SETTINGS
-	/**
-	 * The name of the Elasticsearch cluster to be used for the geo data
-	 */
-	protected static final String ES_CLUSTER = "elasticsearch";
-
-	/**
-	 * The name of the Elasticsearch index to be used for the geo data
-	 */
-	protected static final String ES_INDEX = "testindex";
-
-	/**
-	 * The name of the Elasticsearch type for data from Nominatim to be used for
-	 * the geo data
-	 */
-	protected static final String ES_TYPE_NOMINATIM = "nominatim_data";
-
-	/**
-	 * The name of the Elasticsearch type for data from Wikidata to be used for
-	 * the geo data
-	 */
-	protected static final String ES_TYPE_WIKIDATA = "wikidata_data";
-
-	/**
-	 * The name of the server name for the Elasticsearch index
-	 */
-	protected static final String SERVER_NAME = "localhost";
-
-	/**
-	 * The path to the settings file for the Elasticsearch index
-	 */
-	protected static final String SETTINGS_FILE = "conf/geo-index-settings.json";
-
-	// ELASTICSEARCH COMPONENTS
-	/**
-	 * Settings for the Elasticserach client
-	 */
-	protected static final Settings CLIENT_SETTINGS = Settings.settingsBuilder()
+	static final String ES_CLUSTER = "elasticsearch";
+	static final String ES_INDEX = "testindex";
+	static final String ES_TYPE_NOMINATIM = "nominatim_data";
+	static final String ES_TYPE_WIKIDATA = "wikidata_data";
+	static final String SERVER_NAME = "localhost";
+	static final String SETTINGS_FILE = "conf/geo-index-settings.json";
+	static final Settings CLIENT_SETTINGS = Settings.settingsBuilder()
 			.put("cluster.name", ES_CLUSTER).put("index.name", ES_INDEX)
 			.put("client.transport.sniff", false)
 			.put("client.transport.ping_timeout", 20, TimeUnit.SECONDS)
