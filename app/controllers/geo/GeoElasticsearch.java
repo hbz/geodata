@@ -40,7 +40,7 @@ public class GeoElasticsearch {
 			.put("cluster.name", ES_CLUSTER).put("index.name", ES_INDEX)
 			.put("client.transport.sniff", false)
 			.put("client.transport.ping_timeout", 20, TimeUnit.SECONDS)
-			.put("path.home", ".")
+			.put("path.home", CONFIG.getString("index.es.home"))
 			.put("http.port", CONFIG.getString("index.es.port.http"))
 			.put("transport.tcp.port", CONFIG.getString("index.es.port.tcp")).build();
 
