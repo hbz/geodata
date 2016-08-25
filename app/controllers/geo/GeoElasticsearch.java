@@ -30,17 +30,17 @@ public class GeoElasticsearch {
 			"java.net.URLConnection, email=<semweb@hbz-nrw.de>";
 
 	// ELASTICSEARCH SETTINGS
-	static final String ES_CLUSTER = "elasticsearch";
-	static final String ES_INDEX = "testindex";
+	static final String ES_CLUSTER = CONFIG.getString("index.es.cluster");
+	static final String ES_INDEX = CONFIG.getString("index.es.name");
 	static final String ES_TYPE_NOMINATIM = "nominatim_data";
 	static final String ES_TYPE_WIKIDATA = "wikidata_data";
-	static final String SERVER_NAME = "localhost";
+	static final String SERVER_NAME = CONFIG.getString("index.es.server");
 	static final String SETTINGS_FILE = "conf/geo-index-settings.json";
 	static final Settings CLIENT_SETTINGS = Settings.settingsBuilder()
 			.put("cluster.name", ES_CLUSTER).put("index.name", ES_INDEX)
 			.put("client.transport.sniff", false)
 			.put("client.transport.ping_timeout", 20, TimeUnit.SECONDS)
-			.put("path.home", ".")
+			.put("path.home", CONFIG.getString("index.es.home"))
 			.put("http.port", CONFIG.getString("index.es.port.http"))
 			.put("transport.tcp.port", CONFIG.getString("index.es.port.tcp")).build();
 
