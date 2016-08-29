@@ -35,7 +35,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode geoNode = getFirstGeoNode(query);
 		if (geoNode == null) {
-			return notFound(Constants.NOT_FOUND.concat(query));
+			return internalServerError("`geoNode` is null".concat(query));
 		}
 		return ok(geoNode.toString());
 	}
@@ -102,7 +102,7 @@ public class GeoInformator extends Controller {
 			throws JSONException, IOException {
 		JsonNode postCode = getPostalCode(street, city, country);
 		if (postCode == null) {
-			return notFound(Constants.NOT_FOUND.concat(street).concat("+")
+			return internalServerError("`postCode` is null".concat(street).concat("+")
 					.concat(city).concat("+").concat(country));
 		}
 		return ok(postCode.asText());
@@ -115,15 +115,13 @@ public class GeoInformator extends Controller {
 	 * @param city The name of the city to find the coordinate for
 	 * @param country The name of the country to find the coordinate for
 	 * @return The lat coordinate for the given street address
-	 * @throws JSONException Thrown if first hit of json result cannot be returned
-	 * @throws IOException Thrown if first hit of json result cannot be returned
 	 */
 	public static Result getLat(final String street, final String city,
-			final String country) throws JSONException, IOException {
+			final String country) {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(Constants.NOT_FOUND.concat(street).concat("+")
-					.concat(city).concat("+").concat(country));
+			return internalServerError("`latLong` (for lat) is null".concat(street)
+					.concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("latitude").asText());
 	}
@@ -140,8 +138,8 @@ public class GeoInformator extends Controller {
 			final String country) {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
-			return notFound(Constants.NOT_FOUND.concat(street).concat("+")
-					.concat(city).concat("+").concat(country));
+			return internalServerError("`latLong` (for long) is null".concat(street)
+					.concat("+").concat(city).concat("+").concat(country));
 		}
 		return ok(latLong.get("longitude").asText());
 	}
