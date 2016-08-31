@@ -58,8 +58,10 @@ public class LocalQuery {
 	 * @param aGeoNode The geo node to be added
 	 * @param aEsType The type of data of the geo node (nominatim_data vs.
 	 *          wikidata_data)
+	 * @throws IllegalStateException If indexing was not successful
 	 */
-	public static void addLocal(final JsonNode aGeoNode, String aEsType) {
+	public static void addLocal(final JsonNode aGeoNode, String aEsType)
+			throws IllegalStateException {
 		int retries = 40;
 		while (retries > 0) {
 			try {
@@ -68,7 +70,7 @@ public class LocalQuery {
 						.setSource(aGeoNode.toString()).execute().actionGet();
 				GeoElasticsearch.ES_CLIENT.admin().indices()
 						.refresh(new RefreshRequest()).actionGet();
-				break; // stop retry-while
+				return; // stop retry-while
 			} catch (NoNodeAvailableException e) {
 				retries--;
 				try {
@@ -80,6 +82,7 @@ public class LocalQuery {
 						e.getMessage(), retries);
 			}
 		}
+		throw new IllegalStateException("Indexing new geodata failed");
 	}
 
 }

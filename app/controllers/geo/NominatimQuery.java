@@ -75,9 +75,10 @@ public class NominatimQuery {
 	 * @param aCountry The country name of the address to be packed in the geo
 	 *          node
 	 * @return The Geo Node for geo information
+	 * @throws IllegalStateException If we could not create a JSON object
 	 */
 	public static ObjectNode createGeoNode(final String aStreet,
-			final String aCity, final String aCountry) {
+			final String aCity, final String aCountry) throws IllegalStateException {
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
 		// data enrichment to this geo node:
@@ -93,6 +94,7 @@ public class NominatimQuery {
 								latitude, longitude));
 			} catch (IOException e) {
 				e.printStackTrace();
+				throw new IllegalStateException("Could not create JSON object", e);
 			}
 			if (node != null) {
 				geoNode.put(Constants.GEOCODE, node);
