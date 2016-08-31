@@ -3,11 +3,16 @@ package controllers.geo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.status;
 
 import java.io.IOException;
 
 import org.json.JSONException;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import play.mvc.Http.Status;
 
 @SuppressWarnings("javadoc")
 public class GeoInformatorTest {
@@ -23,7 +28,7 @@ public class GeoInformatorTest {
 	}
 
 	@Test
-	public void testLatLong() throws JSONException, IOException {
+	public void testLatLong() {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
@@ -44,7 +49,7 @@ public class GeoInformatorTest {
 	}
 
 	@Test
-	public void testLong() throws JSONException, IOException {
+	public void testLong() throws JSONException {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
@@ -65,37 +70,33 @@ public class GeoInformatorTest {
 	}
 
 	@Test
-	public void testNonExistingAddressLat() throws JSONException, IOException {
+	public void testNonExistingAddressLat() {
 		String street = "All people are equal";
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(
-				GeoInformator.getLatExplicitNr(street, number, city, country))
-						.contains("404"));
+		assertEquals(Status.NO_CONTENT,
+				status(GeoInformator.getLatExplicitNr(street, number, city, country)));
 	}
 
 	@Test
-	public void testNonExistingAddressLong() throws JSONException, IOException {
+	public void testNonExistingAddressLong() {
 		String street = "All people are equal";
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(
-				GeoInformator.getLongExplicitNr(street, number, city, country))
-						.contains("404"));
+		assertEquals(Status.NO_CONTENT,
+				status(GeoInformator.getLongExplicitNr(street, number, city, country)));
 	}
 
 	@Test
-	public void testNonExistingAddressPostcode()
-			throws JSONException, IOException {
+	public void testNonExistingAddressPostcode() {
 		String street = "All people are equal";
 		String number = "123456789";
 		String city = "Justice";
 		String country = "Land of Peace And Hope";
-		assertTrue(contentAsString(
-				GeoInformator.getPostCodeExplicitNr(street, number, city, country))
-						.contains("404"));
+		assertEquals(Status.NO_CONTENT, status(
+				GeoInformator.getPostCodeExplicitNr(street, number, city, country)));
 	}
 
 	@Test
@@ -104,6 +105,17 @@ public class GeoInformatorTest {
 		String latAndlong = contentAsString(GeoInformator.getWikiData(query));
 		assertTrue(latAndlong.contains("50.942"));
 		assertTrue(latAndlong.contains("6.95777"));
+	}
+
+	/** See https://github.com/hbz/geodata/issues/40 */
+	@Test
+	public void testIssue40() {
+		String street = "J 5";
+		String city = "Mannheim";
+		String country = "DE";
+		JsonNode latLong = GeoInformator.getLatLong(street, city, country);
+		assertEquals("{\"latitude\":\"49.4895914\",\"longitude\":\"8.4672361\"}",
+				latLong.toString());
 	}
 
 }

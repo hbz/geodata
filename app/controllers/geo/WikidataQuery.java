@@ -11,6 +11,9 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/**
+ * Methods to query the Wikidata api.
+ */
 public class WikidataQuery {
 
 	final private static ObjectMapper MAPPER = new ObjectMapper();
@@ -91,29 +94,34 @@ public class WikidataQuery {
 	 * @return The Geo Node for geo information
 	 * @throws JSONException Thrown if Json cannot be read from URL or first Json
 	 *           Object cannot be returned from result set
-	 * @throws IOException Thrown if Json cannot be read from URL
+	 * @throws IllegalStateException If we could not create a JSON object
 	 */
 	public static ObjectNode createGeoNode(final String aQuery)
-			throws JSONException, IOException {
+			throws JSONException {
 
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aQuery);
 
 		// data enrichment to this geo node:
-		JSONObject wikidata = getFirstHit(aQuery);
-		if (wikidata != null) {
-			String id = getId(wikidata);
-			geoNode.put(Constants.ID, id);
+		try {
+			JSONObject wikidata = getFirstHit(aQuery);
+			if (wikidata != null) {
+				String id = getId(wikidata);
+				geoNode.put(Constants.ID, id);
 
-			String label = getLabel(wikidata, id);
-			geoNode.put(Constants.LABEL, label);
+				String label = getLabel(wikidata, id);
+				geoNode.put(Constants.LABEL, label);
 
-			double latitude = getLat(wikidata, id);
-			double longitude = getLong(wikidata, id);
-			geoNode.put(Constants.GEOCODE,
-					new ObjectMapper().readTree( //
-							String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
-									latitude, longitude)));
+				double latitude = getLat(wikidata, id);
+				double longitude = getLong(wikidata, id);
+				geoNode.put(Constants.GEOCODE,
+						new ObjectMapper().readTree( //
+								String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+										latitude, longitude)));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalStateException("Could not create JSON object", e);
 		}
 		return geoNode;
 	}

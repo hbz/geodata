@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -20,8 +21,7 @@ public class NominatimQuery {
 	final private static String mPath = "/search.php";
 
 	private static JSONObject getFirstHit(final String aStreetPlusNumber,
-			final String aCity, final String aCountry)
-			throws JSONException, IOException {
+			final String aCity, final String aCountry) {
 		String queryString = String
 				.format("q=%s%s%s%s%s&addressdetails=1&format=json", aStreetPlusNumber,
 						"%2C+", aCity, "%2C+", aCountry) //
@@ -29,7 +29,7 @@ public class NominatimQuery {
 		queryString = QueryHelpers.repairSpecialChars(queryString);
 		String url = mScheme + "://" + mAuthority + mPath + "?" + queryString;
 		JSONArray results = QueryHelpers.readJsonArrayFromUrl(url, 1000);
-		if (results.length() == 0) {
+		if (results == null || results.length() == 0) {
 			return null;
 		}
 		return results.getJSONObject(0);
@@ -49,7 +49,7 @@ public class NominatimQuery {
 	 */
 	public static JSONObject getFirstHit(final String aStreet,
 			final String aNumber, final String aCity, final String aCountry)
-			throws JSONException, IOException {
+					throws JSONException, IOException {
 		return getFirstHit(aStreet + "+" + aNumber, aCity, aCountry);
 	}
 
@@ -62,7 +62,8 @@ public class NominatimQuery {
 	}
 
 	private static Object getPostcode(final JSONObject aGeoJson) {
-		return aGeoJson.getJSONObject("address").get("postcode");
+		JSONObject address = aGeoJson.getJSONObject("address");
+		return address.has("postcode") ? address.get("postcode") : null;
 	}
 
 	/**
@@ -74,13 +75,10 @@ public class NominatimQuery {
 	 * @param aCountry The country name of the address to be packed in the geo
 	 *          node
 	 * @return The Geo Node for geo information
-	 * @throws JSONException Thrown if Json cannot be read from URL or first Json
-	 *           Object cannot be returned from result set
-	 * @throws IOException Thrown if Json cannot be read from URL
+	 * @throws IllegalStateException If we could not create a JSON object
 	 */
 	public static ObjectNode createGeoNode(final String aStreet,
-			final String aCity, final String aCountry)
-			throws JSONException, IOException {
+			final String aCity, final String aCountry) throws IllegalStateException {
 		// grid data of this geo node:
 		ObjectNode geoNode = buildGeoNode(aStreet, aCity, aCountry);
 		// data enrichment to this geo node:
@@ -89,11 +87,21 @@ public class NominatimQuery {
 			double latitude = getLat(nominatim);
 			double longitude = getLong(nominatim);
 			String postalcode = (String) getPostcode(nominatim);
-			geoNode.put(Constants.GEOCODE,
-					new ObjectMapper().readTree( //
-							String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
-									latitude, longitude)));
-			geoNode.put(Constants.POSTALCODE, postalcode);
+			JsonNode node = null;
+			try {
+				node = new ObjectMapper().readTree( //
+						String.format("{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+								latitude, longitude));
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new IllegalStateException("Could not create JSON object", e);
+			}
+			if (node != null) {
+				geoNode.put(Constants.GEOCODE, node);
+			}
+			if (postalcode != null) {
+				geoNode.put(Constants.POSTALCODE, postalcode);
+			}
 		}
 		return geoNode;
 	}
