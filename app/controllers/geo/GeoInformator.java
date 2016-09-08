@@ -135,11 +135,9 @@ public class GeoInformator extends Controller {
 	 * @param city The name of the city to find the coordinate for
 	 * @param country The name of the country to find the coordinate for
 	 * @return The lon coordinate for the given street address
-	 * @throws JSONException Thrown if first hit of json result cannot be returned
-	 * @throws IOException Thrown if first hit of json result cannot be returned
 	 */
 	public static Result getLong(final String street, final String city,
-			final String country) throws JSONException, IOException {
+			final String country) {
 		JsonNode latLong = getLatLong(street, city, country);
 		if (latLong == null) {
 			return notFound(Constants.NOT_FOUND.concat(street).concat("+")
@@ -155,11 +153,9 @@ public class GeoInformator extends Controller {
 	 * @param city The name of the city to find the coordinates for
 	 * @param country The name of the country to find the coordinates for
 	 * @return The lat and lon coordinates for the given street address
-	 * @throws JSONException Thrown if first hit of json result cannot be returned
-	 * @throws IOException Thrown if first hit of json result cannot be returned
 	 */
 	public static JsonNode getLatLong(final String street, final String city,
-			final String country) throws JSONException, IOException {
+			final String country) {
 		JsonNode geoNode = getFirstGeoNode(street, city, country);
 		if (geoNode == null) {
 			return null;
@@ -168,8 +164,7 @@ public class GeoInformator extends Controller {
 	}
 
 	private static JsonNode getPostalCode(final String aStreet,
-			final String aCity, final String aCountry)
-			throws JSONException, IOException {
+			final String aCity, final String aCountry) throws JSONException {
 		JsonNode geoNode = getFirstGeoNode(aStreet, aCity, aCountry);
 		if (geoNode == null) {
 			return null;
@@ -178,8 +173,7 @@ public class GeoInformator extends Controller {
 	}
 
 	private static JsonNode getFirstGeoNode(final String aStreet,
-			final String aCity, final String aCountry)
-			throws JSONException, IOException {
+			final String aCity, final String aCountry) {
 		SearchResponse response = LocalQuery.queryLocal(aStreet, aCity, aCountry);
 		JsonNode geoNode;
 		if (response == null || response.getHits().getTotalHits() == 0) {

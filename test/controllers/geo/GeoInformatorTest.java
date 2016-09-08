@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 @SuppressWarnings("javadoc")
 public class GeoInformatorTest {
 
@@ -23,7 +25,7 @@ public class GeoInformatorTest {
 	}
 
 	@Test
-	public void testLatLong() throws JSONException, IOException {
+	public void testLatLong() {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
@@ -44,7 +46,7 @@ public class GeoInformatorTest {
 	}
 
 	@Test
-	public void testLong() throws JSONException, IOException {
+	public void testLong() throws JSONException {
 		String street = "Jülicher Straße 6";
 		String city = "Köln";
 		String country = "Germany";
@@ -104,6 +106,17 @@ public class GeoInformatorTest {
 		String latAndlong = contentAsString(GeoInformator.getWikiData(query));
 		assertTrue(latAndlong.contains("50.942"));
 		assertTrue(latAndlong.contains("6.95777"));
+	}
+
+	/** See https://github.com/hbz/geodata/issues/40 */
+	@Test
+	public void testIssue40() {
+		String street = "J 5";
+		String city = "Mannheim";
+		String country = "DE";
+		JsonNode latLong = GeoInformator.getLatLong(street, city, country);
+		assertEquals("{\"latitude\":\"49.4895914\",\"longitude\":\"8.4672361\"}",
+				latLong.toString());
 	}
 
 }
